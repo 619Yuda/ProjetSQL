@@ -1,4 +1,4 @@
--- File created by CsvToSql.sh samedi 25 janvier 2014, 15:21:15 (UTC+0100)
+-- File created by CsvToSql.sh samedi 25 janvier 2014, 15:28:48 (UTC+0100)
 -- Conversion from Oracle to psql
 
 
@@ -48,6 +48,7 @@ INSERT INTO Exemplaire (isbn,numero_exemplaire,etat) VALUES
 ('2266091611',1,'Bon'),
 ('2266091611',2,'Moyen'),
 ('2746021285',1,'Bon'),
+('2746021285',2,'Moyen'),
 ('2746026090',1,'Bon'),
 ('2746026090',2,'Moyen'),
 ('2877065073',1,'Bon'),
