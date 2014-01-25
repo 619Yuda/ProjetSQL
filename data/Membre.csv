@@ -1,0 +1,11 @@
+nom	prenom	adresse	telephone	date_adhere	duree
+Albert	Anne	13 rue des alpes	0601020304	Sysdate-60	1
+Bernaud	Barnabé	6 rue des bécasses	0602030105	Sysdate-10	3
+Cuvard	Camille	53 rue des cerisiers	0602010509	Sysdate-100	6
+Dupond	Daniel	11 rue des daims	0610236515	Sysdate-250	12
+Evroux	Eglantine	34 rue des elfes	0658963125	Sysdate-150	6
+Fregeon	Fernand	11 rue des Francs	0602036987	Sysdate-400	6
+Gorit	Gaston	96 rue de la glacerie	0684235781	Sysdate-150	1
+Hevard	Hector	12 rue haute	0608546578	Sysdate-250	12
+Ingrand	Irène	54 rue de iris	0605020409	Sysdate-50	12
+Juste	Julien	5 place des Jacobins	0603069876	Sysdate-100	6
