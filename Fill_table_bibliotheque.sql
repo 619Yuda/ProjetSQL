@@ -1,4 +1,4 @@
--- File created by CsvToSql.sh samedi 25 janvier 2014, 14:07:12 (UTC+0100)
+-- File created by CsvToSql.sh samedi 25 janvier 2014, 15:21:15 (UTC+0100)
 -- Conversion from Oracle to psql
 
 
@@ -26,25 +26,32 @@ INSERT INTO Ouvrage (isbn,titre,auteur,code_genre,editeur) VALUES
 ('2038704015','De la terre à la lune','Jules Verne ','ROM','Larousse');
 
 INSERT INTO Exemplaire (isbn,numero_exemplaire,etat) VALUES
-('2038704015',1,'Moyen'),
-('2038704015',2,'Bon'),
-('2070367177',1,'Moyen'),
-('2070367177',2,'Bon'),
+('2020549522',1,'Bon'),
+('2020549522',2,'Moyen'),
+('2038704015',1,'Bon'),
+('2038704015',2,'Moyen'),
+('2070367177',1,'Bon'),
+('2070367177',2,'Moyen'),
+('2070400816',1,'Bon'),
+('2070400816',2,'Moyen'),
 ('2080720872',1,'Bon'),
-('2080720872',2,'Bon'),
+('2080720872',2,'Moyen'),
 ('2203314168',1,'Moyen'),
 ('2203314168',2,'Bon'),
 ('2203314168',3,'Neuf'),
-('2253010219',1,'Moyen'),
-('2253010219',2,'Neuf'),
-('2266085816',1,'Mauvais'),
+('2253006327',1,'Bon'),
+('2253006327',2,'Moyen'),
+('2253010219',1,'Bon'),
+('2253010219',2,'Moyen'),
+('2266085816',1,'Bon'),
 ('2266085816',2,'Moyen'),
 ('2266091611',1,'Bon'),
+('2266091611',2,'Moyen'),
 ('2746021285',1,'Bon'),
-('2746021285',2,'Neuf'),
-('2746026090',1,'Neuf'),
-('2877065073',1,'Mauvais'),
-('2877065073',2,'Bon');
+('2746026090',1,'Bon'),
+('2746026090',2,'Moyen'),
+('2877065073',1,'Bon'),
+('2877065073',2,'Moyen');
 
 INSERT INTO Membre (nom,prenom,adresse,telephone,date_adhere,duree) VALUES
 ('Albert','Anne','13 rue des alpes','0601020304',CURRENT_TIMESTAMP - INTERVAL '60 days',1),
