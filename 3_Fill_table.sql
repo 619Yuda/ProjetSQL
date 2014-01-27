@@ -54,7 +54,7 @@ INSERT INTO Exemplaire (isbn,numero_exemplaire,etat) VALUES
 ('2877065073',1,'Bon'),
 ('2877065073',2,'Moyen');
 
-INSERT INTO Membre (nom,prenom,adresse,telephone,date_adhere,duree) VALUES
+INSERT INTO Membre (nom,prenom,adresse,telephone_portable,date_adhere,duree) VALUES
 ('Albert','Anne','13 rue des alpes','0601020304',CURRENT_TIMESTAMP - INTERVAL '60 days',1),
 ('Bernaud','Barnabé','6 rue des bécasses','0602030105',CURRENT_TIMESTAMP - INTERVAL '10 days',3),
 ('Cuvard','Camille','53 rue des cerisiers','0602010509',CURRENT_TIMESTAMP - INTERVAL '100 days',6),

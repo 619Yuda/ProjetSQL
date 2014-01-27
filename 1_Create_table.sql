@@ -34,31 +34,30 @@ CREATE TABLE Ouvrage(
 CREATE TABLE Exemplaire(
     isbn        	NUMERIC(10,0) NOT NULL,
     numero_exemplaire	INTEGER NOT NULL,
-    etat		VARCHAR(10) CHECK( etat IN ('Neuf', 'Bon', 'Moyen', 'Mauvais')),
+    etat		VARCHAR(10) NOT NULL,
 -- -------------------------------------------------------------------------
     CONSTRAINT pk_exemplaire PRIMARY KEY (isbn, numero_exemplaire),
-    CONSTRAINT fk_exemplaire_ouvrage FOREIGN KEY (isbn) REFERENCES Ouvrage(isbn) ON DELETE SET NULL);
+    CONSTRAINT fk_exemplaire_ouvrage FOREIGN KEY (isbn) REFERENCES Ouvrage(isbn) ON DELETE SET NULL,
+    CONSTRAINT cc_exemplaire_etat CHECK( etat IN ('Neuf', 'Bon', 'Moyen', 'Mauvais')));
 
 -- ***************************************************************************************************
-CREATE SEQUENCE seq_numero_membre START WITH 1 INCREMENT BY 1;
 
 CREATE TABLE Membre(
-    numero_membre    	INTEGER NOT NULL DEFAULT nextval('seq_numero_membre'), -- en oracle seq_numero_membre.nextval
+    numero_membre    	INTEGER NOT NULL,
     nom        		VARCHAR(10) NOT NULL,
     prenom        	VARCHAR(10) NOT NULL,
     adresse        	VARCHAR(30) NOT NULL,
     telephone    	VARCHAR(10) NOT NULL,
     date_adhere    	TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    duree        	INTEGER  CHECK( duree IN (1, 3, 6, 12)) NOT NULL,
+    duree        	INTEGER NOT NULL,
 -- -------------------------------------------------------------------------
-    CONSTRAINT pk_membre PRIMARY KEY(numero_membre));
+    CONSTRAINT pk_membre PRIMARY KEY(numero_membre),
+    CONSTRAINT cc_membre_duree CHECK( duree IN (1, 3, 6, 12)));
 
 -- ***************************************************************************************************
 
-CREATE SEQUENCE seq_numero_emprunt START WITH 1 INCREMENT BY 1;
-
 CREATE TABLE Emprunt(
-    numero_emprunt	INTEGER DEFAULT nextval('seq_numero_emprunt'), -- en oracle seq_numero_membre.nextval
+    numero_emprunt	INTEGER NOT NULL,
     numero_membre	INTEGER NOT NULL,
     date_emprunt	TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 -- -------------------------------------------------------------------------
