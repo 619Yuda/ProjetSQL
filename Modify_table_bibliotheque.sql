@@ -29,12 +29,10 @@ CREATE INDEX IDX_ISBN_EXEMPLAIRE ON Details_emprunt(isbn, exemplaire);
 
 
 -- 7
- 
 ALTER TABLE Details_emprunt
     MODIFY CONSTRAINT fk_numero_details_emprunt FOREIGN KEY (numero_details_emprunt) REFERENCES Emprunt(numero_emprunt) ON DELETE CASCADE;
 
 
 -- 8
-
 ALTER TABLE Exemplaire ALTER etat SET DEFAULT 'Neuf';
  
