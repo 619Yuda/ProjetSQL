@@ -9,6 +9,9 @@ partir du 11ème emprunt et jusqu’au 25ème leur état est bon.
 
 -- INSERT colone NB EMPRUNT
 
+ALTER TABLE Exemplaire ADD COLUMN nb_emprunt INTEGER DEFAULT 0; 
+
+
 -- UPDATE EXISTING VALUE
 
 DECLARE
