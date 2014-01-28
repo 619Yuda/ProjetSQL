@@ -24,7 +24,7 @@ Comme cette nouvelle colonne va contenir des informations relatives à un numér
 ALTER TABLE Membre
     ADD telephone_portable VARCHAR(10) NOT NULL;
 ALTER TABLE Membre
-    ADD CONSTRAINT numero_portablechek CHECK (telephone_portable ~ '^[0]{1}[6]{1}[0-9]{8}$'::text);
+    ADD CONSTRAINT cc_telephone_portable CHECK (telephone_portable ~ '^[0]{1}[6]{1}[0-9]{8}$'::text);
 
 /* 5)
 Parmi les membres inscrits, la très grande majorité est constituée d’étudiants. S’ils ont presque toujours un téléphone portable, il est beaucoup plus rare qu’ils disposent d’un téléphone fixe. Aussi nous ne souhaitons pas conserver cette colonne. Comme la base de donnée fonctionne pendant la journée (8h-20h), il va falloir réaliser ce travail en deux étapes. Tout d’abord, marquez cette colonne comme inutilisable, puis lorsque la charge de travail sera moindre pour le moteur de base de données, alors demandez la suppression de cette colonne.*/
@@ -68,10 +68,10 @@ A l’usage, on se rend compte que lorsque l’on souhaite supprimer une fiche d
 dans la table « DETAILS EMPRUNTS » qui font référence à la table « EMPRUNTS » que l’on souhaite supprimer. Comment est-il possible de rendre automatique une telle suppression ?*/
 
 ALTER TABLE Details_Emprunt
- 	DROP CONSTRAINT fk_details_emprunt;
-	
+    DROP CONSTRAINT fk_details_emprunt;
+
 ALTER TABLE Details_Emprunt
- 	ADD CONSTRAINT fk_details_emprunt FOREIGN KEY (numero_emprunt) REFERENCES Emprunt(numero_emprunt) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_details_emprunt FOREIGN KEY (numero_emprunt) REFERENCES Emprunt(numero_emprunt) ON DELETE CASCADE;
 
 /* 8) Modifiez la table des exemplaires afin que la colonne « Etat » prenne par défaut la valeur « Neuf » pour signifier que l’état d’un nouvel exemplaire est par défaut neuf.*/
 
