@@ -184,13 +184,11 @@ SELECT genre.code_genre, genre.libelle, COUNT (*) FROM ouvrage  NATURAL FULL JOI
 /* 12) Etablissez la durée moyenne d’emprunt d’un livre par un membre.*/
 
 SELECT nom, prenom, temp.numero_membre, temp.durée_emprunt_moyenne 
-FROM Membre JOIN (
-	SELECT numero_membre, AVG(details.date_de_rendu - emprunt.date_emprunt) 
-		AS durée_emprunt_moyenne 
-	FROM emprunt NATURAL JOIN details 
-	GROUP BY numero_membre)
-		AS temp 
-USING (numero_membre);
+	FROM Membre JOIN (
+	SELECT numero_membre, AVG(details.date_de_rendu - emprunt.date_emprunt) AS durée_emprunt_moyenne 
+		FROM emprunt NATURAL JOIN details 
+		GROUP BY numero_membre) AS temp 
+	USING (numero_membre);
 
 
 /* 13) Calculez la durée moyenne de l’emprunt en fonction du genre du livre.*/
