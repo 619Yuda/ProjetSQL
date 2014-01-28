@@ -81,7 +81,7 @@ Pour faciliter la gestion des emprunts et identifier plus rapidement les fiches 
 
 -- Ajout d'une colone nb_emprunt dans la table Exemplaire afin de comptabiliser le nombre d'emprunt de chaque livre
 
-ALTER TABLE Emprunt ADD etat VARCHAR(2) DEFAULT 'EC';
+ALTER TABLE Emprunt ADD etat VARCHAR(2) DEFAULT 'RE';
 ALTER TABLE Emprunt ADD CONSTRAINT cc_emprunt_etat CHECK(etat IN('RE', 'EC'));
 
 -- Definition de l'état initial.
@@ -169,35 +169,79 @@ DELETE FROM exemplaire WHERE etat ~* 'Mauvais';
 
 /* 9) Etablissez la liste des ouvrages que possède la bibliothèque.*/
 
-SELECT titre FROM ouvrage;
-
+SELECT isbn, titre FROM ouvrage;
 
 /* 10) Etablissez la liste des membres qui ont emprunté un ouvrage depuis plus de deux semaines en indiquant le nom de l’ouvrage.*/
--- ça implique une  quadruple jointure ça??? bizarre
 
+-- Uniquement pour les membres qui n'ont pas encore rendus depuis plus de 2 semaines
+
+SELECT numero_membre, nom, prenom, titre, date_emprunt
+FROM Membre
+	JOIN Emprunt USING (numero_membre)
+	JOIN Details USING (numero_emprunt)
+	JOIN Ouvrage USING (isbn)
+WHERE date_de_rendu IS NULL AND date_emprunt <= CURRENT_TIMESTAMP - INTERVAL '2 week';
 
 /* 11) Etablissez le nombre d’ouvrages dont on dispose par catégorie.*/
 
-SELECT genre.code_genre, genre.libelle, COUNT (*) FROM ouvrage  NATURAL FULL JOIN genre GROUP BY genre.code_genre;
-
+SELECT code_genre, libelle, COUNT (*) AS nombre_ouvrages
+FROM ouvrage JOIN genre USING (code_genre)
+GROUP BY code_genre, libelle
+ORDER BY nombre_ouvrages;
 
 /* 12) Etablissez la durée moyenne d’emprunt d’un livre par un membre.*/
 
-SELECT nom, prenom, temp.numero_membre, temp.durée_emprunt_moyenne 
-FROM Membre JOIN (
+-- Avec utilisation de sous requêtes
+SELECT temp.numero_membre, nom, prenom, temp.durée_emprunt_moyenne 
+FROM Membre NATURAL JOIN (
 	SELECT numero_membre, AVG(details.date_de_rendu - emprunt.date_emprunt) 
 		AS durée_emprunt_moyenne 
 	FROM emprunt NATURAL JOIN details 
 	GROUP BY numero_membre)
-		AS temp 
-USING (numero_membre);
+		AS temp;
+
+-- Avec double jointure et mise en forme de la sortie du SELECT
+
+SELECT	nom ||' '|| prenom ||' (n°'|| numero_membre ||')' AS Membre,
+	EXTRACT ('day' FROM AVG(date_de_rendu - date_emprunt)) ||' Jour(s)' AS durée_moyenne_emprunt  
+FROM Membre 
+	JOIN emprunt USING (numero_membre)
+	JOIN details USING (numero_emprunt)
+GROUP BY numero_membre, nom, prenom
+ORDER BY nom; 
 
 
 /* 13) Calculez la durée moyenne de l’emprunt en fonction du genre du livre.*/
 
+-- Ajout du libellé de chaque genre (ajout d'une sous requete supplémentaire).
+SELECT code_genre, libelle, duree_moyenne
+FROM genre NATURAL JOIN (
+	SELECT code_genre, AVG(duree) AS duree_moyenne
+	FROM ouvrage NATURAL JOIN (
+		SELECT isbn, (details.date_de_rendu - emprunt.date_emprunt) AS duree
+		FROM emprunt NATURAL JOIN details
+		)AS t1
+	GROUP BY code_genre
+	) AS t2;
+
+-- Avec triple jointure
+SELECT code_genre, libelle, AVG(details.date_de_rendu - emprunt.date_emprunt) AS duree_moyenne_emprunt
+FROM ouvrage 
+	JOIN details USING (isbn)
+	JOIN emprunt USING (numero_emprunt)
+	JOIN genre USING (code_genre)
+GROUP BY code_genre, libelle;
+
 
 /* 14) Etablissez la liste des ouvrages loués plus de 10 fois au cours des 12 derniers mois.*/
 
+SELECT isbn, titre, COUNT (*)
+FROM details
+	JOIN emprunt USING (numero_emprunt)
+	JOIN ouvrage USING (isbn)
+WHERE date_emprunt > CURRENT_TIMESTAMP - INTERVAL '12 month'
+GROUP BY isbn, titre
+HAVING COUNT(*) >= 10;
 
 /* 15) Etablissez la liste de tous les ouvrages avec à côté de chacun d’eux les numéros d’exemplaires qui existent dans la base.*/
 
