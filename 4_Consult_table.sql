@@ -164,8 +164,7 @@ END;
 
 /* 8) Supprimez tous les exemplaires dont l’état est mauvais.*/
 
-DELETE FROM exemplaire WHERE etat ~* 'Mauvais';
-
+DELETE FROM exemplaire WHERE etat ~* 'mauvais';
 
 /* 9) Etablissez la liste des ouvrages que possède la bibliothèque.*/
 
@@ -244,6 +243,9 @@ GROUP BY isbn, titre
 HAVING COUNT(*) >= 10;
 
 /* 15) Etablissez la liste de tous les ouvrages avec à côté de chacun d’eux les numéros d’exemplaires qui existent dans la base.*/
+
+
+
 
 
 /* 16) Définissez une vue qui permet de connaître pour chaque membre, le nombre d’ouvrages empruntés, et donc non encore rendu.*/
