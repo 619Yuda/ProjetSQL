@@ -1,4 +1,4 @@
-echo -e "-- File created by CsvToSql.sh $(date)\n-- Conversion from Oracle to psql\n" > Data.sql
+echo -e "-- File created by CsvToSql.sh $(date)\n-- Version for Oracle\n" > Data.sql
 
 for i in $*; do
     
