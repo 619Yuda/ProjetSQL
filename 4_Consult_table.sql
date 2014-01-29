@@ -251,10 +251,17 @@ HAVING COUNT(*) >= 10;
 /* 16) Définissez une vue qui permet de connaître pour chaque membre, le nombre d’ouvrages empruntés, et donc non encore rendu.*/
 
 
+
+
+
+
 /* 17) Définissez une vue qui permet de connaître le nombre d’emprunts par ouvrage.*/
 
 
 /* 18) Etablissez la liste des membres triés par ordre alphabétique.*/
+
+SELECT nom, prenom, 
+
 
 
 /* 19) On souhaite obtenir le nombre de locations par titre et le nombre de locations de chaque exemplaire. Pour obtenir un tel résultat, il est préférable d’utiliser une table temporaire globale et de la remplir au fur et à mesure. Utilisez la clause ON COMMIT PRESERVE ROWS lors de la création de la table temporaire globale.*/

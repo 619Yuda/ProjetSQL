@@ -8,8 +8,6 @@ DROP TABLE IF EXISTS  Genre CASCADE;
 DROP SEQUENCE IF EXISTS seq_numero_membre;
 DROP SEQUENCE IF EXISTS seq_numero_emprunt;
 
--- modif
-
 -- ***************************************************************************************************
 
 CREATE TABLE Genre(
