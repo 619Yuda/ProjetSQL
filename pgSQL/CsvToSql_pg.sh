@@ -1,4 +1,4 @@
-echo -e "-- File created by CsvToSql.sh $(date)\n-- Conversion from Oracle to psql\n" > Data.sql
+echo -e "-- File created by CsvToSql.sh $(date)\n-- Conversion from Oracle to psql\n" > Fill_table_pg.sql
 
 for i in $*; do
     bn=$(basename $i .csv)
@@ -6,7 +6,7 @@ for i in $*; do
 
     head -n 1 "$i"\
     | tr '\t' ','\
-    | sed 's/\(^.*$\)/\nINSERT INTO '$bn' (\1) VALUES/g' >> Data.sql
+    | sed 's/\(^.*$\)/\nINSERT INTO '$bn' (\1) VALUES/g' >> Fill_table_pg.sql
 
     tail "$i" -n +2\
     | tr '\t' ','\
@@ -16,5 +16,5 @@ for i in $*; do
     | sed 's/#\([0-9]\{1,4\}\)#/\1/g' \
     | sed 's/#NULL#/NULL/g' \
     | sed 's/#Sysdate-\([0-9]\{1,4\}\)#/CURRENT_TIMESTAMP - INTERVAL #\1 days#/g' \
-    | tr '#' ''\''' >> Data.sql
+    | tr '#' ''\''' >> Fill_table_pg.sql
 done;

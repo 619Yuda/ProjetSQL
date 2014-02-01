@@ -1,12 +1,5 @@
-DROP TABLE IF EXISTS  Details_Emprunt CASCADE;
-DROP TABLE IF EXISTS  Details CASCADE;
-DROP TABLE IF EXISTS  Emprunt CASCADE;
-DROP TABLE IF EXISTS  Exemplaire CASCADE;
-DROP TABLE IF EXISTS  Ouvrage CASCADE;
-DROP TABLE IF EXISTS  Membre CASCADE;
-DROP TABLE IF EXISTS  Genre CASCADE;
-DROP SEQUENCE IF EXISTS seq_numero_membre;
-DROP SEQUENCE IF EXISTS seq_numero_emprunt;
+DROP SCHEMA public CASCADE;
+CREATE SCHEMA public;
 
 -- ***************************************************************************************************
 
@@ -77,21 +70,3 @@ CREATE TABLE Details_Emprunt(
     CONSTRAINT fk_detail_exemplaire FOREIGN KEY (isbn, exemplaire) REFERENCES Exemplaire(isbn, numero_exemplaire) ON DELETE CASCADE);
 
 -- ***************************************************************************************************
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -28,19 +28,6 @@ ALTER TABLE Membre
 
 /* 5)
 Parmi les membres inscrits, la très grande majorité est constituée d’étudiants. S’ils ont presque toujours un téléphone portable, il est beaucoup plus rare qu’ils disposent d’un téléphone fixe. Aussi nous ne souhaitons pas conserver cette colonne. Comme la base de donnée fonctionne pendant la journée (8h-20h), il va falloir réaliser ce travail en deux étapes. Tout d’abord, marquez cette colonne comme inutilisable, puis lorsque la charge de travail sera moindre pour le moteur de base de données, alors demandez la suppression de cette colonne.*/
-/*
--- Pour Oracle
-
-ALTER TABLE Membre
-    SET UNUSED (telephone);
- --------------------------------------------- IL FAUT SUREMENT METTRE UN TRUC DU GENRE LOW PRIORITY ICI
-ALTER TABLE Membre
-    DROP CONSTRAINT membre_unique;
-ALTER TABLE Membre
-    DROP UNUSED COLUMNS;
-ALTER TABLE Membre
-    ADD CONSTRAINT constraint_name UNIQUE(numero_membre, nom, prenom, telephone_portable);
-*/
 
 -- Pour psql version sans gestion du unused
 
@@ -80,12 +67,9 @@ ALTER TABLE Exemplaire ALTER etat SET DEFAULT 'Neuf';
 /* 9)
 Le terme de « membre » choque certains de nos interlocuteurs qui les considèrent comme des « abonnés ». Pour d’autres au contraire, ce sont des membres et à ce titre, ils possèdent le privilège de pouvoir emprunter des livres. Afin de résoudre simplement le problème, définissez le synonyme « abonnes » pour la table des membres. Ainsi dans les futuresrequêtes, il sera possible de faire référence à la table des membres ou bien à la table des abonnés.*/
 
--- Oracle uniquement
--- CREATE SYNONYM Abonnes FOR bibliotheque.Membre;
+-- Oracle uniquement = SYNOMYM n'existe pas sous postgres
 
 /* 10) Après réflexion, la table « DETAILS EMPRUNTS » n’est pas bien nommée. On lui préférera le nom « DETAILS ». Renommez la table afin de prendre en compte cette nouvelle exigence. */
-
--- RENAME TABLE Details_emprunt TO Details;
 
 ALTER TABLE Details_Emprunt RENAME TO Details; -- STANDARD SQL
 
