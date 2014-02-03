@@ -1,4 +1,6 @@
 -- 1 -- Etablissez le nombre d’emprunts par ouvrage et par exemplaire. Utilisez l’opérateur ROLLUP pour effectuer le calcul d’agrégat sur les critères de regroupement plus généraux. Utilisez la fonction DECODE pour présenter le résultat de façon plus lisible.
+-- ne marche que sur oracle, attention, je n'ai pas réussi a caser le mot clé DECODE...
+SELECT count(*), count(*) FROM Details GROUP BY ROLLUP(isbn, exemplaire);
 
 -- 2 -- Etablissez la liste des exemplaires qui n’ont jamais été empruntés au cours des trois derniers mois. Pour effectuer les calculs sur les trois derniers mois, c’est la date de retour de l’exemplaire qui est prise en compte.
 -- ne marche que sur oracle
@@ -39,3 +41,48 @@ COMMENT ON TABLE Ouvrage IS 'Descriptifs des ouvrages référencés par la bibli
 COMMENT ON TABLE Exemplaire IS 'Définition précise des livres présents dans la bibliothèque';
 COMMENT ON TABLE Emprunt IS 'Fiche d''emprunt de livres, toujours associée à un et un seul membre';
 COMMENT ON TABLE Details IS 'Chaque ligne correspond à un libre emprunté';
+
+-- 8 -- Interrogez les commentaires associés aux tables présentes dans le schéma de l’utilisateur courant. La table USER_TAB_COMMENTS du dictionnaire doit être mise à contribution.
+-- ne marche que sur oracle
+SELECT * FROM USER_TAB_COMMENTS
+-- optionnel -- WHERE table_name = 'nom_de_la_table';
+
+-- 9 -- Lors de la création d’un nouveau membre, on souhaite enregistrer un emprunt dans la même transaction. Comment rendre possible cette nouvelle contrainte de fonctionnement ?
+-- Ajouter une instruction dans le TRIGGER de la table membre qui propose d'ajouter une ligne dans les tables details en et emprunt avec les informations correspondantes à chaque fois qu'un membre est inséré
+-- à tester
+CREATE OR REPLACE TRIGGER AfterInstructionOnMember
+    AFTER UPDATE ON MEMBRE
+    BEGIN
+        INSERT INTO Temp_AFFICHAGE VALUES(
+        v_compteur.NEXTVAL,
+        ‘AFTER niveau instruction : compteur =’ || TriggerMoment.v_compteur );
+        TriggerMoment.v_compteur := TriggerMoment.v_compteur + 1;
+		PROMPT 'Ajouter un nouvel emprun ? (Y/N)'
+		ACCEPT choix
+		IF choix = 'Y'
+			INSERT INTO Emprunt (numero_emprunt, numero_membre, date_emprunt, etat) VALUES (seq_numero_emprunt.NEXTVAL, v_compteur, SYSDATE, 'EC');
+			PROMPT 'ISBN ?'
+			ACCEPT isbn
+			PROMPT 'Exemplaire ?'
+			ACCEPT exemplaire
+			INSERT INTO Details (numero_emprunt, numero_detail, isbn, exemplaire, date_de_rendu) VALUES (seq_numero_emprunt, v_compteur, isbn, exemplaire, NULL);
+    END BeforeInstructionOnMember;
+
+-- 10 -- Supprimez la table des détails.
+DROP TABLE Details;
+
+-- 11 -- Annulez cette suppression de table.
+
+-- 12 -- Avis de non-recherche pour la question 12, on vous paye pour que vous ne la cherchiez pas...
+
+-- 13 -- Les utilisateurs souhaitent une requête qui permette d’afficher un message en fonction du nombre d’exemplaires de chaque ouvrage.
+-- à modifier
+SELECT count(*)
+	CASE 'Message'
+		WHEN count(*) = 0 THEN 'Aucun'
+		WHEN count(*) < 2 THEN 'Peu'
+		WHEN count(*) < 5 THEN 'Normal'
+		WHEN count(*) >= 5 THEN 'Beaucoup'
+	END
+FROM Exemplaire GROUP BY (isbn, exemplaire);
+
