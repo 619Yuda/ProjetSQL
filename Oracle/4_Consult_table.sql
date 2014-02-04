@@ -1,6 +1,6 @@
 /* 4) Extraction simple d’informations
 Consultez le contenu de chaque table à l’aide d’une requête d’extraction simple qui permet de visualiser toutes les lignes et toutes les colonnes de chaque table.*/
-
+-- test oracle ok
 SELECT * FROM Genre;
 SELECT * FROM Ouvrage;
 SELECT * FROM Exemplaire;
@@ -10,7 +10,7 @@ SELECT * FROM Details;
 
 /* 5) Activation de l’historique des mouvements
 Les manipulations de la table des membres sont sensibles. Activez l’historique des mouvements sur cette table. Effectuez la même opération sur la table « DETAILS » */
-/*
+-- test oracle ok 
 CREATE TABLE Temp_Membre(
     id_affichage NUMBER(2),
     affichage VARCHAR2(50));
@@ -20,18 +20,8 @@ CREATE TABLE Temp_Details(
     affichage VARCHAR2(50));
 
 CREATE SEQUENCE compteur START WITH 1 INCREMENT BY 1;
-*/
-/*
-CREATE TABLE Temp_Membre(
-    id_affichage NUMERIC(2),
-    affichage VARCHAR(50));
 
-CREATE TABLE Temp_Details(
-    id_affichage NUMERIC(2),
-    affichage VARCHAR(50));
-
-CREATE SEQUENCE compteur START WITH 1 INCREMENT BY 1;
-
+-- test oracle ok, a vérifier
 CREATE OR REPLACE PACKAGE TriggerMoment
     AS v_compteur NUMBER:=0;
 END TriggerMoment
@@ -75,53 +65,58 @@ CREATE OR REPLACE TRIGGER AfterInstructionOnDetails
         ‘AFTER niveau instruction : compteur =’ || TriggerMoment.v_compteur );
         TriggerMoment.v_compteur := TriggerMoment.v_compteur + 1;
     END AfterInstructionOnDetails;
-*/
+
 /* 6) Ajout d’une colonne :
 Pour faciliter la gestion des emprunts et identifier plus rapidement les fiches pour lesquelles l’ensemble des exemplaires n’est pas restitué, il a été décidé d’ajouter une colonne «ETAT »qui peut prendre les valeurs (EC : en cours) par défaut et (RE : rendue) lorsque l’ensemble des exemplaires est rendu. Ecrivez l’instruction SQL qui permet d’effectuer la modification de structure souhaitée. Mettez à jour l’état de chaque fiche de location en le faisant passer à RE (rendue) si tous les ouvrages empruntés par le membre ont été restitués à la bibliothèque. */
 
 -- Ajout d'une colone nb_emprunt dans la table Exemplaire afin de comptabiliser le nombre d'emprunt de chaque livre
-
+-- test oracle ok
 ALTER TABLE Emprunt ADD etat VARCHAR(2) DEFAULT 'RE';
 ALTER TABLE Emprunt ADD CONSTRAINT cc_emprunt_etat CHECK(etat IN('RE', 'EC'));
 
 -- Definition de l'état initial.
+-- test oracle fail : 1 ligne mise à jour
 UPDATE emprunt SET etat = 'EC' WHERE numero_emprunt = (SELECT DISTINCT numero_emprunt FROM emprunt NATURAL JOIN details WHERE date_de_rendu IS NULL);
 
-
 /*DECLARE
-    CURSOR curseur IS SELECT etat FROM Emprunt
-    anom emp.ename%TYPE;
-    salaire emp.sal%TYPE;
-    BEGIN
-        OPEN dept_10;
-        LOOP
-            FETCH dept_10 INTO nom, salaire;
-            EXIT WHEN dept_10%NOTFOUND or dept_10%ROWCOUNT >15;
-            IF salaire >2500 THEN
-                INSERT INTO résultat VALUES (nom,salaire);
-            END IF;
-        END LOOP;
-    CLOSE dept_10;
+CURSOR c_details IS SELECT date_de_rendu FROM Details;
+	v_date_de_rendu details.date_de_rendu%TYPE;
+	v_numero_emprunt details.numero_emprunt%TYPE;
+	BEGIN
+		OPEN c_details;
+		LOOP
+			FETCH c_details INTO v_date_de_rendu;
+			FETCH c_details INTO v_numero_emprunt;
+		EXIT WHEN c_details%NOTFOUND or c_details%ROWCOUNT >15;
+		IF v_date_de_rendu IS NULL THEN
+			UPDATE Emprunt SET etat = 'EC' WHERE Emprunt.numero_emprunt = v_numero_emprunt;
+		ELSE
+			UPDATE Emprunt SET etat = 'RE' WHERE Emprunt.numero_emprunt = v_numero_emprunt;
+		END IF;
+	END LOOP;
+	CLOSE c_details;
 END;*/
 
 /*
-CURSOR curseur IS
-    SELECT etat,
-    FROM Emprunt
-    FOR UPDATE OF etat
-    v_emprunt c_emprunt%ROWTYPE;
-    v_details c_details%ROWTYPE;
-    BEGIN
-        OPEN c_emprunt;
-        OPEN c_details;
-        FETCH c_emprunt INTO v_emprunt;
-        UPDATE Emprunt SET etat = 'EC'
-        WHERE c_details.numero_emprunt = c_emprunt.numero_emprunt AND (c_details.date_de_rendu IS NULL);
-        UPDATE Emprunt SET etat = 'RE'
-        WHERE c_details.numero_emprunt = c_emprunt.numero_emprunt AND (c_details.date_de_rendu IS NOT NULL);
-        COMMIT
-        CLOSE_ v_emprunt;
-    END;
+CURSOR c_emprunt IS SELECT * FROM Emprunt;
+CURSOR c_details IS SELECT * FROM Details;
+SELECT etat,
+FROM Emprunt, Details
+FOR UPDATE OF etat
+	v_emprunt c_emprunt%ROWTYPE;
+	v_details c_details%ROWTYPE;
+	BEGIN
+		OPEN c_emprunt;
+		OPEN c_details;
+		FETCH c_emprunt INTO v_emprunt;
+		UPDATE Emprunt SET etat = 'EC'
+		WHERE c_details.numero_emprunt = c_emprunt.numero_emprunt AND (c_details.date_de_rendu IS NULL);
+		UPDATE Emprunt SET etat = 'RE'
+		WHERE c_details.numero_emprunt = c_emprunt.numero_emprunt AND (c_details.date_de_rendu IS NOT NULL);
+		COMMIT
+	CLOSE c_emprunt;
+	CLOSE c_details;
+END;
 */
 
 

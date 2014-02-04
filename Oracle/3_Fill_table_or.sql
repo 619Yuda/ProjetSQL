@@ -1,8 +1,6 @@
 -- File created by CsvToSql.sh vendredi 31 janvier 2014, 19:21:36 (UTC+0100)
 -- Version for Oracle
 
-
-
 INSERT INTO Genre (code_genre,libelle) VALUES ('REC','Récit');
 INSERT INTO Genre (code_genre,libelle) VALUES ('POL','Policier');
 INSERT INTO Genre (code_genre,libelle) VALUES ('BD','Bande Dessinée');

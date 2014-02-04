@@ -1,68 +1,81 @@
-/*2)
-Définissez une séquence afin de faciliter la mise en place d’un numéro pour chaque membre. La séquence doit commencer avec la valeur 1 et elle possédera un pas d’incrément de 1.*/
+DROP TABLE Details_Emprunt PURGE;
+DROP TABLE Details PURGE;
+DROP TABLE Emprunt PURGE;
+DROP TABLE Exemplaire PURGE;
+DROP TABLE Ouvrage PURGE;
+DROP TABLE Membre PURGE;
+--DROP PUBLIC SYNONYM Abonnes;
+DROP TABLE Genre PURGE;
+DROP SEQUENCE seq_numero_membre;
+DROP SEQUENCE seq_numero_emprunt;
 
-CREATE SEQUENCE seq_numero_membre START WITH 1 INCREMENT BY 1;
-CREATE SEQUENCE seq_numero_emprunt START WITH 1 INCREMENT BY 1;
+-- ***************************************************************************************************
 
- -- en oracle Utilisation de seq_numero_membre.nextval au moment de l'insertion d'une nouvelle colonne
+CREATE TABLE Genre(
+    code_genre		VARCHAR2(5) NOT NULL,
+    libelle		VARCHAR2(30) NOT NULL,
+-- -------------------------------------------------------------------------
+    CONSTRAINT pk_genre PRIMARY KEY (code_genre));
 
-/*3)
-Les membres sont très nombreux et si certains sont des lecteurs assidus, d’autres au contraire ne renouvellent pas leur adhésion tous les ans. Pour ces derniers, il n’est pas souhaitable d’avoir des informations en double dans la base. Aussi il ne doit pas être possible d’avoir deux membres qui possèdent même nom, prénom et numéro de téléphone fixe. Définissez une contrainte d’intégrité afin de satisfaire cette nouvelle exigence. La contrainte sera ajoutée sur la table des membres par l’intermédiaire de l’instruction « alter table ».*/
+-- ***************************************************************************************************
 
-ALTER TABLE Membre
-    ADD CONSTRAINT membre_unique UNIQUE(numero_membre, nom, prenom, telephone);
+CREATE TABLE Ouvrage(
+    isbn        	NUMERIC(10,0) NOT NULL,
+    titre       	VARCHAR2(100) NOT NULL,
+    auteur        	VARCHAR2(30) DEFAULT NULL,
+    editeur        	VARCHAR2(30) DEFAULT NULL,
+    code_genre    	VARCHAR2(5) DEFAULT NULL,
+-- -------------------------------------------------------------------------
+    CONSTRAINT pk_ouvrage PRIMARY KEY (isbn),
+    CONSTRAINT fk_ouvrage_genre FOREIGN KEY (code_genre) REFERENCES Genre(code_genre) ON DELETE SET NULL);
 
-/* 4)
-De plus en plus de membres possèdent deux numéros de téléphone : un pour le poste fixe de leur domicile et un pour leur téléphone portable. Malheureusement la base ne nous permet de stocker qu’un seul numéro de téléphone. Apportez les modifications de structure nécessaires pour prendre en compte cette modification.
-Comme cette nouvelle colonne va contenir des informations relatives à un numéro de portable, mettez en place une contrainte d’intégrité afin de vous assurez que le numéro de téléphone saisi commence par « 06 ». */
+-- ***************************************************************************************************
 
-ALTER TABLE Membre
-    ADD telephone_portable VARCHAR(10) NOT NULL;
+CREATE TABLE Exemplaire(
+    isbn        	NUMERIC(10,0) NOT NULL,
+    numero_exemplaire	INTEGER NOT NULL,
+    etat		VARCHAR2(10) NOT NULL,
+-- -------------------------------------------------------------------------
+    CONSTRAINT pk_exemplaire PRIMARY KEY (isbn, numero_exemplaire),
+    CONSTRAINT fk_exemplaire_ouvrage FOREIGN KEY (isbn) REFERENCES Ouvrage(isbn) ON DELETE SET NULL,
+    CONSTRAINT cc_exemplaire_etat CHECK( etat IN ('Neuf', 'Bon', 'Moyen', 'Mauvais')));
 
-	ALTER TABLE Membre
-    ADD CONSTRAINT cc_telephone_portable CHECK (REGEXP_LIKE (telephone_portable, '^[0]{1}[6]{1}[0-9]{8}$'));
+-- ***************************************************************************************************
 
-/* 5)
-Parmi les membres inscrits, la très grande majorité est constituée d’étudiants. S’ils ont presque toujours un téléphone portable, il est beaucoup plus rare qu’ils disposent d’un téléphone fixe. Aussi nous ne souhaitons pas conserver cette colonne. Comme la base de donnée fonctionne pendant la journée (8h-20h), il va falloir réaliser ce travail en deux étapes. Tout d’abord, marquez cette colonne comme inutilisable, puis lorsque la charge de travail sera moindre pour le moteur de base de données, alors demandez la suppression de cette colonne.*/
+CREATE TABLE Membre(
+    numero_membre    	INTEGER NOT NULL,
+    nom        		VARCHAR2(10) NOT NULL,
+    prenom        	VARCHAR2(10) NOT NULL,
+    adresse        	VARCHAR2(30) NOT NULL,
+    telephone    	VARCHAR2(10) NOT NULL,
+    date_adhere    	DATE NOT NULL,
+    duree        	INTEGER NOT NULL,
+-- -------------------------------------------------------------------------
+    CONSTRAINT pk_membre PRIMARY KEY(numero_membre),
+    CONSTRAINT cc_membre_duree CHECK( duree IN (1, 3, 6, 12)));
 
-ALTER TABLE Membre
-    DROP CONSTRAINT membre_unique;
-ALTER TABLE Membre
-    SET UNUSED (telephone);
-ALTER TABLE Membre
-    DROP UNUSED COLUMNS;
-ALTER TABLE Membre
-    ADD CONSTRAINT constraint_name UNIQUE(numero_membre, nom, prenom, telephone_portable);
+-- ***************************************************************************************************
 
-/* 6)
-Afin d’améliorer les performances d’accès aux données, définissez un index sur toutes les colonnes de type clé étrangère. Ainsi, les opérations de jointure seront plus rapides.*/
+CREATE TABLE Emprunt(
+    numero_emprunt	INTEGER NOT NULL,
+    numero_membre	INTEGER NOT NULL,
+    date_emprunt	DATE NOT NULL,
+-- -------------------------------------------------------------------------
+    CONSTRAINT pk_emprunt PRIMARY KEY (numero_emprunt),
+    CONSTRAINT fk_emprunt_membre FOREIGN KEY (numero_membre) REFERENCES Membre(numero_membre) ON DELETE SET NULL);
 
-CREATE INDEX IDX_OUVRAGE_OUVRAGE_GENRE ON Ouvrage (code_genre);
-CREATE INDEX IDX_EXEMPLAIRE_ISBN ON Exemplaire (isbn);
-CREATE INDEX IDX_EMPRUNT_NBMEMBRE ON Emprunt (numero_membre);
-CREATE INDEX IDX_NUMERO_DETAILS_EMPRUNT ON Details_emprunt(numero_detail);
-CREATE INDEX IDX_ISBN_EXEMPLAIRE ON Details_emprunt(isbn, exemplaire);
+-- ***************************************************************************************************
 
-/* 7)
-A l’usage, on se rend compte que lorsque l’on souhaite supprimer une fiche d’emprunt, il faut nécessairement supprimer toutes les lignes précédentes
-dans la table « DETAILS EMPRUNTS » qui font référence à la table « EMPRUNTS » que l’on souhaite supprimer. Comment est-il possible de rendre automatique une telle suppression ?*/
+CREATE TABLE Details_Emprunt(
+    numero_emprunt 	INTEGER NOT NULL,
+    numero_detail 	INTEGER NOT NULL,
+    isbn 		NUMERIC(10,0) NOT NULL,
+    exemplaire 		INTEGER NOT NULL,
+    date_de_rendu	DATE DEFAULT NULL,
+-- -------------------------------------------------------------------------
+    CONSTRAINT pk_details PRIMARY KEY (numero_emprunt, numero_detail),
+    CONSTRAINT fk_details_emprunt FOREIGN KEY (numero_emprunt) REFERENCES Emprunt(numero_emprunt) ON DELETE SET NULL,
+    CONSTRAINT fk_details_exemplaire FOREIGN KEY (isbn, exemplaire) REFERENCES Exemplaire(isbn, numero_exemplaire) ON DELETE SET NULL);
 
-ALTER TABLE Details_Emprunt
-    DROP CONSTRAINT fk_details_emprunt;
-
-ALTER TABLE Details_Emprunt
-    ADD CONSTRAINT fk_details_emprunt FOREIGN KEY (numero_emprunt) REFERENCES Emprunt(numero_emprunt) ON DELETE CASCADE;
-
-/* 8) Modifiez la table des exemplaires afin que la colonne « Etat » prenne par défaut la valeur « Neuf » pour signifier que l’état d’un nouvel exemplaire est par défaut neuf.*/
-
-ALTER TABLE Exemplaire MODIFY (etat DEFAULT 'Neuf');
-
-/* 9)
-Le terme de « membre » choque certains de nos interlocuteurs qui les considèrent comme des « abonnés ». Pour d’autres au contraire, ce sont des membres et à ce titre, ils possèdent le privilège de pouvoir emprunter des livres. Afin de résoudre simplement le problème, définissez le synonyme « abonnes » pour la table des membres. Ainsi dans les futuresrequêtes, il sera possible de faire référence à la table des membres ou bien à la table des abonnés.*/
-
-CREATE SYNONYM Abonnes FOR Membre;
-
-/* 10) Après réflexion, la table « DETAILS EMPRUNTS » n’est pas bien nommée. On lui préférera le nom « DETAILS ». Renommez la table afin de prendre en compte cette nouvelle exigence. */
-
-ALTER TABLE Details_Emprunt RENAME TO Details;
+-- ***************************************************************************************************
 
