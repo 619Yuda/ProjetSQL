@@ -11,129 +11,49 @@ SELECT * FROM Details;
 /* 5) Activation de l’historique des mouvements
 Les manipulations de la table des membres sont sensibles. Activez l’historique des mouvements sur cette table. Effectuez la même opération sur la table « DETAILS » */
 
-CREATE TABLE Temp_Membre(
-    id_affichage NUMERIC(3),
-    affichage VARCHAR(50));
-
-CREATE TABLE Temp_Details(
-    id_affichage NUMERIC(3),
-    affichage VARCHAR(50));
-
-CREATE SEQUENCE compteur START WITH 1 INCREMENT BY 1;
-/*
-CREATE OR REPLACE PACKAGE TriggerMoment
-    AS v_compteur NUMBER:=0;
-END TriggerMoment
-
-CREATE OR REPLACE TRIGGER AfterInstructionOnMember
-    AFTER UPDATE ON MEMBRE
-    BEGIN
-        INSERT INTO Temp_AFFICHAGE VALUES(
-
-        compteur.NEXTVAL,
-        ‘AFTER niveau instruction : compteur =’ || TriggerMoment.v_compteur );
-        TriggerMoment.v_compteur := TriggerMoment.v_compteur + 1;
-    END BeforeInstructionOnMember;
-
-CREATE OR REPLACE TRIGGER AfterInstructionOnDetails
-    AFTER UPDATE ON DETAILS
-    BEGIN
-        INSERT INTO Temp_AFFICHAGE VALUES(
-
-        compteur.NEXTVAL,
-        ‘AFTER niveau instruction : compteur =’ || TriggerMoment.v_compteur );
-        TriggerMoment.v_compteur := TriggerMoment.v_compteur + 1;
-    END AfterInstructionOnDetails;
-*/
+/* FONCTION NON EXISTANTE EN POSTGRES */
 
 /* 6) Ajout d’une colonne :
 Pour faciliter la gestion des emprunts et identifier plus rapidement les fiches pour lesquelles l’ensemble des exemplaires n’est pas restitué, il a été décidé d’ajouter une colonne «ETAT »qui peut prendre les valeurs (EC : en cours) par défaut et (RE : rendue) lorsque l’ensemble des exemplaires est rendu. Ecrivez l’instruction SQL qui permet d’effectuer la modification de structure souhaitée. Mettez à jour l’état de chaque fiche de location en le faisant passer à RE (rendue) si tous les ouvrages empruntés par le membre ont été restitués à la bibliothèque. */
 
 -- Ajout d'une colone nb_emprunt dans la table Exemplaire afin de comptabiliser le nombre d'emprunt de chaque livre
 
-ALTER TABLE Emprunt ADD etat VARCHAR(2) DEFAULT 'RE';
+ALTER TABLE Emprunt ADD etat VARCHAR(2) DEFAULT 'EC';
 ALTER TABLE Emprunt ADD CONSTRAINT cc_emprunt_etat CHECK(etat IN('RE', 'EC'));
 
 -- Definition de l'état initial.
-UPDATE emprunt SET etat = 'EC' WHERE numero_emprunt = (SELECT DISTINCT numero_emprunt FROM emprunt NATURAL JOIN details WHERE date_de_rendu IS NULL);
 
+UPDATE emprunt SET etat = 'RE' WHERE numero_emprunt NOT IN (SELECT DISTINCT numero_emprunt FROM emprunt NATURAL JOIN details WHERE date_de_rendu IS NULL);
 
-/*DECLARE
-    CURSOR curseur IS SELECT etat FROM Emprunt
-    anom emp.ename%TYPE;
-    salaire emp.sal%TYPE;
-    BEGIN
-        OPEN dept_10;
-        LOOP
-            FETCH dept_10 INTO nom, salaire;
-            EXIT WHEN dept_10%NOTFOUND or dept_10%ROWCOUNT >15;
-            IF salaire >2500 THEN
-                INSERT INTO résultat VALUES (nom,salaire);
-            END IF;
-        END LOOP;
-    CLOSE dept_10;
-END;*/
-
-/*
-CURSOR curseur IS
-    SELECT etat,
-    FROM Emprunt
-    FOR UPDATE OF etat
-    v_emprunt c_emprunt%ROWTYPE;
-    v_details c_details%ROWTYPE;
-    BEGIN
-        OPEN c_emprunt;
-        OPEN c_details;
-        FETCH c_emprunt INTO v_emprunt;
-        UPDATE Emprunt SET etat = 'EC'
-        WHERE c_details.numero_emprunt = c_emprunt.numero_emprunt AND (c_details.date_de_rendu IS NULL);
-        UPDATE Emprunt SET etat = 'RE'
-        WHERE c_details.numero_emprunt = c_emprunt.numero_emprunt AND (c_details.date_de_rendu IS NOT NULL);
-        COMMIT
-        CLOSE_ v_emprunt;
-    END;
-*/
 
 /* 7) Mise à jour conditionnelle
 On souhaite modifier l’état des exemplaires en fonction de leur nombre de locations afin de faire passer les exemplaires actuellement à l’état Neuf vers l’état Bon et supprimer les exemplaires qui ont été loués plus de 60 fois. En effet, les bibliothécaires considèrent qu’un tel exemplaire doit être retiré de la location car il ne répond pas à la qualité souhaitée par les membres. Les livres sont considérés neufs lorsqu’ils ont été empruntés moins de 11 fois. A partir du 11ème emprunt et jusqu’au 25ème leur état est bon. */
 
--- Ajout d'une colone nb_emprunt dans la table Exemplaire afin de comptabiliser le nombre d'emprunt de chaque livre
+-- Reinitialisation de l'etat de tt les exemplaires
 
-ALTER TABLE Exemplaire ADD COLUMN nb_emprunt INTEGER DEFAULT 0;
+UPDATE exemplaire SET etat = 'Neuf';
 
+-- La sous requête SELECT renvoie la liste des isbn et numero d'exemplaire ayant été comptabilisé plus de n fois dans la table details. Ces valeurs sont ensuite utilisées pour mettre à jour l'état des exemplaires concernés dans la table Exemplaire
 
--- Definition de l'état initial du nombre d'emprunt en se basant sur l'état des livres
--- Neuf = 0 fois / Bon = 11 fois / Moyen = 25 fois / Mauvais = 60 fois
+UPDATE exemplaire
+SET etat = 'Bon'
+WHERE (isbn, numero_exemplaire) IN (
+	SELECT  isbn, numero_exemplaire FROM details GROUP BY isbn, numero_exemplaire HAVING COUNT(*) BETWEEN 11 AND 24);
 
-UPDATE Exemplaire SET nb_emprunt = 11 WHERE etat ~* 'bon';
-UPDATE Exemplaire SET nb_emprunt = 25 WHERE etat ~* 'moyen';
-UPDATE Exemplaire SET nb_emprunt = 60 WHERE etat ~* 'mauvais';
+UPDATE exemplaire
+SET etat = 'Moyen'
+WHERE (isbn, numero_exemplaire) IN (
+	SELECT  isbn, numero_exemplaire FROM details GROUP BY isbn, numero_exemplaire HAVING COUNT(*) BETWEEN 25 AND 59);
 
+UPDATE exemplaire
+SET etat = 'Mauvais'
+WHERE (isbn, numero_exemplaire) IN (
+	SELECT  isbn, numero_exemplaire FROM details GROUP BY isbn, numero_exemplaire HAVING COUNT(*) >= 60);
 
-/*LA SUITE EST A FAIRE DIRECTEMENT EN ORACLE
-
-DECLARE
-CURSOR c_exemplaire IS
-    SELECT nb_emprunt, etat
-    FROM Exemplaire
-    FOR UPDATE OF nb_emprunt ;
-
-v_exemplaire  c_exemplaire%ROWTYPE;
-
-BEGIN
-    OPEN c_exemplaire;
-    FETCH c_exemplaire INTO v_exemplaire;
-        CASE
-        UPDATE EMPLOYES SET SALAIRE = V_employe.SALAIRE + V_employe.salaire * 0.1
-        WHERE NOM = V_employe.NOM ;
-    COMMIT;
-    CLOSE c_employe ;
-END;
-*/
 
 /* 8) Supprimez tous les exemplaires dont l’état est mauvais.*/
 
-DELETE FROM exemplaire WHERE etat ~* 'mauvais';
+DELETE FROM exemplaire WHERE etat ~ 'Mauvais';
 
 /* 9) Etablissez la liste des ouvrages que possède la bibliothèque.*/
 
@@ -180,7 +100,7 @@ ORDER BY nom;
 
 /* 13) Calculez la durée moyenne de l’emprunt en fonction du genre du livre.*/
 
--- Ajout du libellé de chaque genre (ajout d'une sous requete supplémentaire).
+-- Ajout du libellé de chaque genre ave 2 sous requêtes
 SELECT code_genre, libelle, duree_moyenne
 FROM genre NATURAL JOIN (
 	SELECT code_genre, AVG(duree) AS duree_moyenne
@@ -191,7 +111,7 @@ FROM genre NATURAL JOIN (
 	GROUP BY code_genre
 	) AS t2;
 
--- Avec triple jointure
+-- Même resultats avec une triple jointure et mise en forme de la sortie du SELECT
 SELECT code_genre, libelle, EXTRACT ('day' FROM AVG(details.date_de_rendu - emprunt.date_emprunt)) ||' Jour(s)' AS duree_moyenne_emprunt
 FROM ouvrage 
 	JOIN details USING (isbn)
@@ -219,15 +139,17 @@ GROUP BY titre;
 
 /* 16) Définissez une vue qui permet de connaître pour chaque membre, le nombre d’ouvrages empruntés, et donc non encore rendu.*/
 
-CREATE VIEW nb_ouvrages_empruntes AS 
-	SELECT numero_membre, COUNT (*) FROM Emprunt E, Details D
+CREATE OR REPLACE VIEW nb_ouvrages_empruntes AS 
+	SELECT numero_membre, COUNT (*) AS Nb_emprunt 
+	FROM Emprunt E, Details D
 	WHERE E.numero_emprunt = D.numero_emprunt
 	GROUP BY numero_membre;
 
 /* 17) Définissez une vue qui permet de connaître le nombre d’emprunts par ouvrage.*/
 
-CREATE VIEW nb_emprunts_par_ouvrage AS 
-	SELECT isbn, COUNT (*) FROM Details
+CREATE OR REPLACE VIEW nb_emprunts_par_ouvrage AS 
+	SELECT isbn, COUNT (*) AS Nb_emprunt 
+	FROM Details
 	GROUP BY isbn;
 
 /* 18) Etablissez la liste des membres triés par ordre alphabétique.*/
@@ -242,12 +164,10 @@ CREATE GLOBAL TEMPORARY TABLE location_exemplaires_titres (
 	exemplaire INTEGER NOT NULL)
 ON COMMIT PRESERVE ROWS;
 
--- remplissage ?
-
 
 /* 20) Affichez la liste des genres et pour chaque genre, la liste des ouvrages qui lui appartiennent.*/
 
-SELECT DISTINCT libelle, titre FROM Genre G, Ouvrage O
-	WHERE G.code_genre = O.code_genre
-	GROUP BY libelle, titre;
+SELECT libelle, titre
+FROM Genre JOIN Ouvrage USING (code_genre)
+ORDER BY libelle;
 

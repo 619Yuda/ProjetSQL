@@ -47,7 +47,7 @@ CREATE INDEX IDX_OUVRAGE_OUVRAGE_GENRE ON Ouvrage (code_genre);
 CREATE INDEX IDX_EXEMPLAIRE_ISBN ON Exemplaire (isbn);
 CREATE INDEX IDX_EMPRUNT_NBMEMBRE ON Emprunt (numero_membre);
 CREATE INDEX IDX_NUMERO_DETAILS_EMPRUNT ON Details_emprunt(numero_detail);
-CREATE INDEX IDX_ISBN_EXEMPLAIRE ON Details_emprunt(isbn, exemplaire);
+CREATE INDEX IDX_ISBN_EXEMPLAIRE ON Details_emprunt(isbn, numero_exemplaire);
 
 
 /* 7)

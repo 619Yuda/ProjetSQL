@@ -1,4 +1,4 @@
--- File created by CsvToSql.sh samedi 25 janvier 2014, 15:28:48 (UTC+0100)
+-- File created by CsvToSql.sh mercredi 5 février 2014, 12:14:03 (UTC+0100)
 -- Conversion from Oracle to psql
 
 
@@ -88,7 +88,7 @@ INSERT INTO Emprunt (numero_membre,date_emprunt) VALUES
 (4,CURRENT_TIMESTAMP - INTERVAL '20 days'),
 (1,CURRENT_TIMESTAMP - INTERVAL '10 days');
 
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES
 (1,1,'2038704015',1,CURRENT_TIMESTAMP - INTERVAL '195 days'),
 (1,2,'2070367177',2,CURRENT_TIMESTAMP - INTERVAL '190 days'),
 (2,1,'2080720872',1,CURRENT_TIMESTAMP - INTERVAL '180 days'),

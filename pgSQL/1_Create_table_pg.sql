@@ -62,11 +62,11 @@ CREATE TABLE Details_Emprunt(
     numero_emprunt  INTEGER NOT NULL,
     numero_detail   INTEGER NOT NULL,
     isbn        NUMERIC(10,0) NOT NULL,
-    exemplaire      INTEGER NOT NULL,
+    numero_exemplaire      INTEGER NOT NULL,
     date_de_rendu   DATE DEFAULT NULL,
 -- -------------------------------------------------------------------------
     CONSTRAINT pk_details PRIMARY KEY (numero_emprunt, numero_detail),
     CONSTRAINT fk_details_emprunt FOREIGN KEY (numero_emprunt) REFERENCES Emprunt(numero_emprunt) ON DELETE CASCADE,
-    CONSTRAINT fk_detail_exemplaire FOREIGN KEY (isbn, exemplaire) REFERENCES Exemplaire(isbn, numero_exemplaire) ON DELETE CASCADE);
+    CONSTRAINT fk_detail_exemplaire FOREIGN KEY (isbn, numero_exemplaire) REFERENCES Exemplaire(isbn, numero_exemplaire) ON DELETE CASCADE);
 
 -- ***************************************************************************************************
