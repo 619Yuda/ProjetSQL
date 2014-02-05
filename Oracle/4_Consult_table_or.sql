@@ -2,7 +2,7 @@
 
 /* 4) Extraction simple d’informations
 Consultez le contenu de chaque table à l’aide d’une requête d’extraction simple qui permet de visualiser toutes les lignes et toutes les colonnes de chaque table.*/
-
+-- test oracle ok
 SELECT * FROM Genre;
 SELECT * FROM Ouvrage;
 SELECT * FROM Exemplaire;
@@ -13,9 +13,9 @@ SELECT * FROM Details;
 -- ##############################################################################################
 
 /* 5) Activation de l’historique des mouvements
-Les manipulations de la table des membres sont sensibles. Activez l’historique des mouvements sur cette table. Effectuez la même opération sur la table « DETAILS » */
-
-/* FONCTION NON EXISTANTE EN POSTGRES */
+Les manipulations de la table des membres sont sensibles. Activez l’historique des mouvements sur cette table. Effectuez la même opération sur la table « DETAILS » -- The row_movement_clause lets you specify whether Oracle can move a table row. It is possible for a row to move, for example, during data segment compression or an update operation on partitioned data.*/
+ALTER TABLE Membre ENABLE ROW MOVEMENT;
+ALTER TABLE Details ENABLE ROW MOVEMENT;
 
 -- ##############################################################################################
 
@@ -23,13 +23,19 @@ Les manipulations de la table des membres sont sensibles. Activez l’historique
 Pour faciliter la gestion des emprunts et identifier plus rapidement les fiches pour lesquelles l’ensemble des exemplaires n’est pas restitué, il a été décidé d’ajouter une colonne «ETAT »qui peut prendre les valeurs (EC : en cours) par défaut et (RE : rendue) lorsque l’ensemble des exemplaires est rendu. Ecrivez l’instruction SQL qui permet d’effectuer la modification de structure souhaitée. Mettez à jour l’état de chaque fiche de location en le faisant passer à RE (rendue) si tous les ouvrages empruntés par le membre ont été restitués à la bibliothèque. */
 
 -- Ajout d'une colone nb_emprunt dans la table Exemplaire afin de comptabiliser le nombre d'emprunt de chaque livre
-
 ALTER TABLE Emprunt ADD etat VARCHAR(2) DEFAULT 'EC';
 ALTER TABLE Emprunt ADD CONSTRAINT cc_emprunt_etat CHECK(etat IN('RE', 'EC'));
 
--- Definition de l'état initial.
-
+-- Definition de l'état initial
 UPDATE emprunt SET etat = 'RE' WHERE numero_emprunt NOT IN (SELECT DISTINCT numero_emprunt FROM details WHERE date_de_rendu IS NULL);
+
+
+
+-- ##############################################################################################
+-- # EN DESSOUS + A VERIFIER SOUS ORACLE
+-- ##############################################################################################
+
+
 
 -- ##############################################################################################
 
@@ -81,7 +87,18 @@ FROM Membre
 	JOIN Emprunt USING (numero_membre)
 	JOIN Details USING (numero_emprunt)
 	JOIN Ouvrage USING (isbn)
-WHERE date_de_rendu IS NULL AND date_emprunt <= CURRENT_TIMESTAMP - INTERVAL '2 week';
+WHERE date_de_rendu IS NULL
+	AND date_emprunt <= Sysdate-14;
+
+-- ALTERNATIVE SYSDATE
+
+SELECT numero_membre, nom, prenom, titre, date_emprunt
+FROM Membre
+	JOIN Emprunt USING (numero_membre)
+	JOIN Details USING (numero_emprunt)
+	JOIN Ouvrage USING (isbn)
+WHERE date_de_rendu IS NULL
+	AND trunc(sysdate, 'WW') - trunc (date_emprunt, 'WW') >= 2;
 
 -- ##############################################################################################
 
@@ -121,6 +138,15 @@ FROM Membre
 GROUP BY numero_membre, nom, prenom
 ORDER BY nom; 
 
+-- ALTERNATIVE avec un SELECT plus classique
+
+SELECT nom, prenom, numero_membre, AVG(date_de_rendu - date_emprunt) AS durée_moyenne_emprunt  
+FROM Membre 
+	JOIN emprunt USING (numero_membre)
+	JOIN details USING (numero_emprunt)
+GROUP BY numero_membre, nom, prenom
+ORDER BY nom; 
+
 -- ##############################################################################################
 
 /* 13) Calculez la durée moyenne de l’emprunt en fonction du genre du livre.*/
@@ -146,6 +172,15 @@ FROM ouvrage
 	JOIN genre USING (code_genre)
 GROUP BY code_genre, libelle;
 
+-- ALTERNATIVE avec un SELECT plus classique
+
+SELECT code_genre, libelle, AVG(date_de_rendu - date_emprunt) AS durée_moyenne_emprunt
+FROM ouvrage 
+	JOIN details USING (isbn)
+	JOIN emprunt USING (numero_emprunt)
+	JOIN genre USING (code_genre)
+GROUP BY code_genre, libelle;
+
 -- ##############################################################################################
 
 /* 14) Etablissez la liste des ouvrages loués plus de 10 fois au cours des 12 derniers mois.*/
@@ -160,6 +195,15 @@ WHERE date_emprunt > CURRENT_TIMESTAMP - INTERVAL '12 month'
 GROUP BY isbn, titre
 HAVING COUNT(*) >= 10;
 
+-- ALTERNATIVE SYSDATE
+SELECT isbn, titre, COUNT (*)  AS Nb_emprunt 
+FROM details
+	JOIN emprunt USING (numero_emprunt)
+	JOIN ouvrage USING (isbn)
+WHERE trunc(sysdate, 'MM') - trunc (date_emprunt, 'MM') <= 12;
+GROUP BY isbn, titre
+	HAVING COUNT(*) >= 10;
+
 -- ##############################################################################################
 
 /* 15) Etablissez la liste de tous les ouvrages avec à côté de chacun d’eux les numéros d’exemplaires qui existent dans la base.*/
@@ -168,13 +212,12 @@ SELECT titre, COUNT(*) AS quantité_exemplaire
 FROM Ouvrage LEFT JOIN exemplaire USING (isbn) 
 GROUP BY titre;
 
--- OUTDATED JOIN ALTERNATIVE
+-- OUTDATED LEFT JOIN ALTERNATIVE
 
 SELECT titre, COUNT(*) AS quantité_exemplaire
 	FROM Ouvrage, Exemplaire
-WHERE  Ouvrage.isbn = Exemplaire.isbn
+WHERE  Ouvrage.isbn (+) = Exemplaire.isbn
 GROUP BY titre;
-
 
 -- ##############################################################################################
 
@@ -226,6 +269,7 @@ CREATE GLOBAL TEMPORARY TABLE location_exemplaires_titres (
 	exemplaire INTEGER NOT NULL)
 ON COMMIT PRESERVE ROWS;
 
+
 -- ##############################################################################################
 
 /* 20) Affichez la liste des genres et pour chaque genre, la liste des ouvrages qui lui appartiennent.*/
@@ -233,4 +277,6 @@ ON COMMIT PRESERVE ROWS;
 SELECT libelle, titre
 FROM Genre JOIN Ouvrage USING (code_genre)
 ORDER BY libelle;
+
+-- C EST BIEN PLUS COMPLIQUE QUE CA
 

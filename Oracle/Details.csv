@@ -1,4 +1,4 @@
-numero_emprunt	numero_detail	isbn	exemplaire	date_de_rendu
+numero_emprunt	numero_detail	isbn	numero_exemplaire	date_de_rendu
 1	1	2038704015	1	Sysdate-195
 1	2	2070367177	2	Sysdate-190
 2	1	2080720872	1	Sysdate-180

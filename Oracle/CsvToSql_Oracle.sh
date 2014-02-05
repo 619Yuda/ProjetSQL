@@ -1,11 +1,11 @@
-echo -e "-- File created by CsvToSql.sh $(date)\n-- Version for Oracle\n" > Fill_table_or.sql
+echo -e "-- File created by CsvToSql.sh $(date)\n-- Version for Oracle\n" > 3_Fill_table_or.sql
 for i in $*; do
 
     bn=$(basename $i .csv)
 
     var=$(head -n 1 "$i" | tr '\t' ',')
 
-    echo -e "\n" >> Fill_table_or.sql
+    echo -e "\n" >> 3_Fill_table_or.sql
     tail "$i" -n +2\
     | tr '\t' ',' \
     | sed 's/\([^,]*\)/#\1#/g' \
@@ -14,6 +14,6 @@ for i in $*; do
     | sed 's/#NULL#/NULL/g' \
     | sed 's/#\(Sysdate-[0-9]\{1,4\}\)#/\1/g' \
     | sed 's/#\(.*NEXTVAL\)#/\1/g' \
-    | tr '#' ''\''' >> Fill_table_or.sql
+    | tr '#' ''\''' >> 3_Fill_table_or.sql
 
 done;

@@ -1,5 +1,7 @@
--- File created by CsvToSql.sh vendredi 31 janvier 2014, 19:21:36 (UTC+0100)
+-- File created by CsvToSql.sh mercredi 5 février 2014, 21:20:36 (UTC+0100)
 -- Version for Oracle
+
+
 
 INSERT INTO Genre (code_genre,libelle) VALUES ('REC','Récit');
 INSERT INTO Genre (code_genre,libelle) VALUES ('POL','Policier');
@@ -87,33 +89,33 @@ INSERT INTO Emprunt (numero_emprunt,numero_membre,date_emprunt) VALUES (seq_nume
 INSERT INTO Emprunt (numero_emprunt,numero_membre,date_emprunt) VALUES (seq_numero_emprunt.NEXTVAL,1,Sysdate-10);
 
 
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (1,1,'2038704015',1,Sysdate-195);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (1,2,'2070367177',2,Sysdate-190);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (2,1,'2080720872',1,Sysdate-180);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (2,2,'2203314168',1,Sysdate-179);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (3,1,'2038704015',1,Sysdate-170);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (4,1,'2203314168',2,Sysdate-155);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (4,2,'2080720872',1,Sysdate-155);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (4,3,'2266085816',1,Sysdate-159);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (5,1,'2038704015',2,Sysdate-140);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (6,1,'2266085816',2,Sysdate-141);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (6,2,'2080720872',2,Sysdate-130);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (6,3,'2746021285',2,Sysdate-133);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (7,1,'2070367177',2,Sysdate-100);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (8,1,'2080720872',1,Sysdate-116);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (9,1,'2038704015',1,Sysdate-100);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (10,1,'2080720872',2,Sysdate-107);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (10,2,'2746026090',1,Sysdate-78);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (11,1,'2746021285',1,Sysdate-81);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (12,1,'2203314168',1,Sysdate-86);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (12,2,'2038704015',1,Sysdate-60);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (13,1,'2070367177',1,Sysdate-65);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (14,1,'2266091611',1,Sysdate-66);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (15,1,'2266085816',1,Sysdate-50);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (16,1,'2253010219',2,Sysdate-41);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (16,2,'2070367177',2,Sysdate-41);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (17,1,'2877065073',2,Sysdate-36);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (18,1,'2070367177',1,Sysdate-14);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (19,1,'2746026090',1,Sysdate-12);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (20,1,'2266091611',1,NULL);
-INSERT INTO Details (numero_emprunt,numero_detail,isbn,exemplaire,date_de_rendu) VALUES (20,2,'2253010219',1,NULL);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (1,1,'2038704015',1,Sysdate-195);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (1,2,'2070367177',2,Sysdate-190);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (2,1,'2080720872',1,Sysdate-180);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (2,2,'2203314168',1,Sysdate-179);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (3,1,'2038704015',1,Sysdate-170);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (4,1,'2203314168',2,Sysdate-155);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (4,2,'2080720872',1,Sysdate-155);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (4,3,'2266085816',1,Sysdate-159);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (5,1,'2038704015',2,Sysdate-140);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (6,1,'2266085816',2,Sysdate-141);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (6,2,'2080720872',2,Sysdate-130);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (6,3,'2746021285',2,Sysdate-133);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (7,1,'2070367177',2,Sysdate-100);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (8,1,'2080720872',1,Sysdate-116);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (9,1,'2038704015',1,Sysdate-100);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (10,1,'2080720872',2,Sysdate-107);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (10,2,'2746026090',1,Sysdate-78);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (11,1,'2746021285',1,Sysdate-81);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (12,1,'2203314168',1,Sysdate-86);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (12,2,'2038704015',1,Sysdate-60);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (13,1,'2070367177',1,Sysdate-65);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (14,1,'2266091611',1,Sysdate-66);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (15,1,'2266085816',1,Sysdate-50);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (16,1,'2253010219',2,Sysdate-41);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (16,2,'2070367177',2,Sysdate-41);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (17,1,'2877065073',2,Sysdate-36);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (18,1,'2070367177',1,Sysdate-14);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (19,1,'2746026090',1,Sysdate-12);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (20,1,'2266091611',1,NULL);
+INSERT INTO Details (numero_emprunt,numero_detail,isbn,numero_exemplaire,date_de_rendu) VALUES (20,2,'2253010219',1,NULL);

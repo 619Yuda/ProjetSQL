@@ -1,10 +1,9 @@
-DROP TABLE Details_Emprunt PURGE;
 DROP TABLE Details PURGE;
 DROP TABLE Emprunt PURGE;
 DROP TABLE Exemplaire PURGE;
 DROP TABLE Ouvrage PURGE;
 DROP TABLE Membre PURGE;
---DROP PUBLIC SYNONYM Abonnes;
+DROP PUBLIC SYNONYM Abonnes;
 DROP TABLE Genre PURGE;
 DROP SEQUENCE seq_numero_membre;
 DROP SEQUENCE seq_numero_emprunt;
