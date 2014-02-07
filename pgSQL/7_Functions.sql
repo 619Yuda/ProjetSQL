@@ -67,3 +67,4 @@ CREATE OR REPLACE FUNCTION DureeMoyenne(isbn IS NUMERIC(10,0), exmplaire IS INTE
 BEGIN
 	
 END;
+
