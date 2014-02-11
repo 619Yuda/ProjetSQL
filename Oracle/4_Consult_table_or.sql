@@ -43,11 +43,11 @@ UPDATE emprunt SET etat = 'RE' WHERE numero_emprunt NOT IN (SELECT DISTINCT nume
 On souhaite modifier l’état des exemplaires en fonction de leur nombre de locations afin de faire passer les exemplaires actuellement à l’état Neuf vers l’état Bon et supprimer les exemplaires qui ont été loués plus de 60 fois. En effet, les bibliothécaires considèrent qu’un tel exemplaire doit être retiré de la location car il ne répond pas à la qualité souhaitée par les membres. Les livres sont considérés neufs lorsqu’ils ont été empruntés moins de 11 fois. A partir du 11ème emprunt et jusqu’au 25ème leur état est bon. */
 
 -- Reinitialisation de l'etat de tt les exemplaires
-
+-- ok
 UPDATE exemplaire SET etat = 'Neuf';
 
 -- La sous requête SELECT renvoie la liste des isbn et numero d'exemplaire ayant été comptabilisé plus de n fois dans la table details. Ces valeurs sont ensuite utilisées pour mettre à jour l'état des exemplaires concernés dans la table Exemplaire
-
+-- ok
 UPDATE exemplaire
 SET etat = 'Bon'
 WHERE (isbn, numero_exemplaire) IN (
@@ -68,12 +68,15 @@ WHERE (isbn, numero_exemplaire) IN (
 /* 8) Supprimez tous les exemplaires dont l’état est mauvais.*/
 
 -- Aucun livre a supprimer dans l'exemple...
-DELETE FROM exemplaire WHERE etat ~ 'Mauvais';
+-- ok
+DELETE FROM exemplaire WHERE etat LIKE 'Mauvais';
+-- ou
+DELETE FROM exemplaire WHERE etat = 'Mauvais';
 
 -- ##############################################################################################
 
 /* 9) Etablissez la liste des ouvrages que possède la bibliothèque.*/
-
+-- ok
 SELECT isbn, titre FROM ouvrage;
 
 -- ##############################################################################################
@@ -81,7 +84,7 @@ SELECT isbn, titre FROM ouvrage;
 /* 10) Etablissez la liste des membres qui ont emprunté un ouvrage depuis plus de deux semaines en indiquant le nom de l’ouvrage.*/
 
 -- Uniquement pour les membres qui n'ont pas encore rendus depuis plus de 2 semaines
-
+-- ok les deux
 SELECT numero_membre, nom, prenom, titre, date_emprunt
 FROM Membre
 	JOIN Emprunt USING (numero_membre)
@@ -105,7 +108,7 @@ WHERE date_de_rendu IS NULL
 /* 11) Etablissez le nombre d’ouvrages dont on dispose par catégorie.*/
 
 -- Pour avoir à la fois le nombre d'exemplaires et le libellé du genre, il faut faire une double jointure des tables genre, ouvrage et exemplaire
-
+-- ok 
 SELECT libelle, COUNT (*) AS nombre_ouvrages
 FROM ouvrage
 	JOIN genre USING (code_genre)
@@ -119,28 +122,9 @@ ORDER BY nombre_ouvrages;
 
 -- Pour avoir les nom et prenom des membres ainsi que leur durée moyenne d'emprunt, il est necessaire de faire une jointure entre les tables membre, emprunt et details. AVG ne prend pas en compte la valeur si elle est NULL = pas besoin de filtrer date_de rendu NOT NULL. Il faut grouper par numero de membre, mais pour rendre l'affichage de sortie plus agréable, nous avons également ajouté les nom et prénom des membres
 
--- Avec utilisation de sous requêtes
-SELECT temp.numero_membre, nom, prenom, temp.durée_emprunt_moyenne 
-FROM Membre NATURAL JOIN (
-	SELECT numero_membre, AVG(details.date_de_rendu - emprunt.date_emprunt) 
-		AS durée_emprunt_moyenne 
-	FROM emprunt NATURAL JOIN details 
-	GROUP BY numero_membre)
-		AS temp;
-
--- Avec double jointure et mise en forme de la sortie du SELECT
-
-SELECT	nom ||' '|| prenom ||' (n°'|| numero_membre ||')' AS Membre,
-	EXTRACT ('day' FROM AVG(date_de_rendu - date_emprunt)) ||' Jour(s)' AS durée_moyenne_emprunt  
-FROM Membre 
-	JOIN emprunt USING (numero_membre)
-	JOIN details USING (numero_emprunt)
-GROUP BY numero_membre, nom, prenom
-ORDER BY nom; 
-
 -- ALTERNATIVE avec un SELECT plus classique
-
-SELECT nom, prenom, numero_membre, AVG(date_de_rendu - date_emprunt) AS durée_moyenne_emprunt  
+-- ok 
+SELECT nom, prenom, numero_membre, round(AVG(date_de_rendu - date_emprunt)) AS durée_moyenne_emprunt  
 FROM Membre 
 	JOIN emprunt USING (numero_membre)
 	JOIN details USING (numero_emprunt)
@@ -153,28 +137,9 @@ ORDER BY nom;
 
 -- la requete est assez semblable, mais il faut cette fois grouper par genre. De la même façon que precedement, nous avons souhaité ajouter le libellé pour rendre l'affichage plus agréable. Il a été necessaire de faire une jointure supllémentaire avec la table Genre. 
 
--- Ajout du libellé de chaque genre avec 2 sous requêtes
-SELECT code_genre, libelle, duree_moyenne
-FROM genre NATURAL JOIN (
-	SELECT code_genre, AVG(duree) AS duree_moyenne
-	FROM ouvrage NATURAL JOIN (
-		SELECT isbn, (details.date_de_rendu - emprunt.date_emprunt) AS duree
-		FROM emprunt NATURAL JOIN details
-		)AS t1
-	GROUP BY code_genre
-	) AS t2;
-
--- Même resultats avec une triple jointure et mise en forme de la sortie du SELECT
-SELECT code_genre, libelle, EXTRACT ('day' FROM AVG(details.date_de_rendu - emprunt.date_emprunt)) ||' Jour(s)' AS duree_moyenne_emprunt
-FROM ouvrage 
-	JOIN details USING (isbn)
-	JOIN emprunt USING (numero_emprunt)
-	JOIN genre USING (code_genre)
-GROUP BY code_genre, libelle;
-
 -- ALTERNATIVE avec un SELECT plus classique
-
-SELECT code_genre, libelle, AVG(date_de_rendu - date_emprunt) AS durée_moyenne_emprunt
+-- ok
+SELECT code_genre, libelle, round(AVG(date_de_rendu - date_emprunt)) AS durée_moyenne_emprunt
 FROM ouvrage 
 	JOIN details USING (isbn)
 	JOIN emprunt USING (numero_emprunt)
@@ -187,88 +152,111 @@ GROUP BY code_genre, libelle;
 
 -- Il est necessaire de faire une jointure entre les tables details, emprunt et ouvrage et limitant les résultats pour lequels la date d'emprunt est daté de moins de 12 mois. Les  résultats sous ensuite groupé par isbn (et titre) mais seuls les groupes avec plus de 10 emprunts enregistrés sont renvoyés 
 
-SELECT isbn, titre, COUNT (*)  AS Nb_emprunt 
-FROM details
-	JOIN emprunt USING (numero_emprunt)
-	JOIN ouvrage USING (isbn)
-WHERE date_emprunt > CURRENT_TIMESTAMP - INTERVAL '12 month'
-GROUP BY isbn, titre
-HAVING COUNT(*) >= 10;
-
 -- ALTERNATIVE SYSDATE
+-- ok
 SELECT isbn, titre, COUNT (*)  AS Nb_emprunt 
 FROM details
 	JOIN emprunt USING (numero_emprunt)
 	JOIN ouvrage USING (isbn)
-WHERE trunc(sysdate, 'MM') - trunc (date_emprunt, 'MM') <= 12;
+WHERE SYSDATE - INTERVAL '12' MONTH <= date_emprunt
 GROUP BY isbn, titre
-	HAVING COUNT(*) >= 10;
+	HAVING COUNT(*) >= 2
+ORDER BY COUNT(*) ASC;
+ 
+---- OU
+-- ok
+SELECT isbn, titre, COUNT (*)  AS Nb_emprunt 
+FROM details
+	JOIN emprunt USING (numero_emprunt)
+	JOIN ouvrage USING (isbn)
+WHERE SYSDATE - 365 <= date_emprunt
+GROUP BY isbn, titre
+	HAVING COUNT(*) >= 10
+ORDER BY COUNT(*) ASC;
 
 -- ##############################################################################################
 
 /* 15) Etablissez la liste de tous les ouvrages avec à côté de chacun d’eux les numéros d’exemplaires qui existent dans la base.*/
-
+-- ok
 SELECT titre, COUNT(*) AS quantité_exemplaire
 FROM Ouvrage LEFT JOIN exemplaire USING (isbn) 
-GROUP BY titre;
+GROUP BY titre
+ORDER BY COUNT(*) ASC;
 
 -- OUTDATED LEFT JOIN ALTERNATIVE
-
+-- ok
 SELECT titre, COUNT(*) AS quantité_exemplaire
 	FROM Ouvrage, Exemplaire
 WHERE  Ouvrage.isbn (+) = Exemplaire.isbn
-GROUP BY titre;
+GROUP BY titre
+ORDER BY COUNT(*) ASC;
 
 -- ##############################################################################################
 
 /* 16) Définissez une vue qui permet de connaître pour chaque membre, le nombre d’ouvrages empruntés, et donc non encore rendu.*/
-
+-- ok
 CREATE OR REPLACE VIEW nb_ouvrages_empruntes AS 
 	SELECT numero_membre, COUNT (*) AS Nb_emprunt 
-	FROM Emprunt JOIN Details USING (numero_emprunt)
+	FROM Emprunt E JOIN Details USING (numero_emprunt)
+	WHERE E.etat = 'EC'
 	GROUP BY numero_membre;
 
 -- OUTDATED JOIN ALTERNATIVE
-
+-- ok
 CREATE OR REPLACE VIEW nb_ouvrages_empruntes AS 
 	SELECT numero_membre, COUNT (*) AS Nb_emprunt 
 	FROM Emprunt E, Details D
-	WHERE E.numero_emprunt = D.numero_emprunt
+	WHERE E.numero_emprunt = D.numero_emprunt and E.etat = 'EC'
 	GROUP BY numero_membre;
+
+SELECT * FROM nb_ouvrages_empruntes;
 
 -- ##############################################################################################
 
 /* 17) Définissez une vue qui permet de connaître le nombre d’emprunts par ouvrage.*/
-
+-- ok
 CREATE OR REPLACE VIEW nb_emprunts_par_ouvrage AS 
 	SELECT isbn, COUNT (*) AS Nb_emprunt 
 	FROM Details
 	GROUP BY isbn;
 
+SELECT * FROM nb_emprunts_par_ouvrage;
+
 -- ##############################################################################################
 
 /* 18) Etablissez la liste des membres triés par ordre alphabétique.*/
-
+-- ok 
 SELECT nom, prenom, numero_membre FROM Membre ORDER BY nom;
 
 -- ##############################################################################################
 
 /* 19) On souhaite obtenir le nombre de locations par titre et le nombre de locations de chaque exemplaire. Pour obtenir un tel résultat, il est préférable d’utiliser une table temporaire globale et de la remplir au fur et à mesure. Utilisez la clause ON COMMIT PRESERVE ROWS lors de la création de la table temporaire globale.*/
 
-
-
 -- ##############################################################################################
 -- # EN DESSOUS + A TERMINER
 -- ##############################################################################################
 
+/*SELECT count(*) FROM Exemplaire E, Details D WHERE D.isbn = E.isbn and D.exemplaire = E.numero_exemplaire GROUP BY E.isbn, E.exemplaire;*/
 
+
+DROP TABLE location_exemplaires_titres PURGE;
 
 CREATE GLOBAL TEMPORARY TABLE location_exemplaires_titres (
-	numero_emprunt INTEGER NOT NULL,
 	isbn NUMERIC(10,0),
-	exemplaire INTEGER NOT NULL)
+	exemplaire INTEGER,
+	nombre_emprunt_ouvrage INTEGER,
+	nombre_emprunt_exemplaire INTEGER)
 ON COMMIT PRESERVE ROWS;
 
+INSERT INTO location_exemplaires_titres(isbn, exemplaire) SELECT isbn, numero_exemplaire FROM Exemplaire;
+
+UPDATE location_exemplaires_titres SET nombre_emprunt_ouvrage = (SELECT COUNT(*) FROM Details  WHERE Details.isbn = location_exemplaires_titres.isbn GROUP BY Details.isbn);
+
+UPDATE location_exemplaires_titres SET nombre_emprunt_exemplaire = (SELECT COUNT(*) FROM Details WHERE Details.isbn = location_exemplaires_titres.isbn and Details.exemplaire = location_exemplaires_titres.exemplaire GROUP BY Details.isbn, Details.exemplaire);
+
+COMMIT;
+
+SELECT * FROM location_exemplaires_titres;
 
 -- ##############################################################################################
 
