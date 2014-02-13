@@ -72,17 +72,22 @@ CREATE OR REPLACE TRIGGER AfterInstructionOnMember
 DROP TABLE Details;
 
 -- 11 -- Annulez cette suppression de table.
+FLASHBACK TABLE Details to BEFORE DROP;
 
--- 12 -- Avis de non-recherche pour la question 12, on vous paye pour que vous ne la cherchiez pas...
+-- 12 -- ???
 
 -- 13 -- Les utilisateurs souhaitent une requête qui permette d’afficher un message en fonction du nombre d’exemplaires de chaque ouvrage.
 -- à modifier
-SELECT count(*)
-	CASE 'Message'
-		WHEN count(*) = 0 THEN 'Aucun'
-		WHEN count(*) < 2 THEN 'Peu'
-		WHEN count(*) < 5 THEN 'Normal'
-		WHEN count(*) >= 5 THEN 'Beaucoup'
-	END
-FROM Exemplaire GROUP BY (isbn, exemplaire);
+SELECT O.isbn, O.titre, CASE count(*)
+		WHEN 0 THEN 'Aucun'
+		WHEN 1 THEN 'Peu'
+		WHEN 2 THEN 'Peu'
+		WHEN 3 THEN 'Normal'
+		WHEN 4 THEN 'Normal'
+		WHEN 5 THEN 'Normal'
+		ElSE 'Beaucoup'
+	END as "Nombre"
+FROM Exemplaire E, Ouvrage O
+WHERE O.isbn = E.isbn
+GROUP BY (O.isbn, O.titre);
 
