@@ -248,11 +248,12 @@ CREATE GLOBAL TEMPORARY TABLE location_exemplaires_titres (
 	nombre_emprunt_exemplaire INTEGER)
 ON COMMIT PRESERVE ROWS;
 
-INSERT INTO location_exemplaires_titres(isbn, exemplaire) SELECT isbn, numero_exemplaire FROM Exemplaire;
-
-UPDATE location_exemplaires_titres SET nombre_emprunt_ouvrage = (SELECT COUNT(*) FROM Details  WHERE Details.isbn = location_exemplaires_titres.isbn GROUP BY Details.isbn);
-
-UPDATE location_exemplaires_titres SET nombre_emprunt_exemplaire = (SELECT COUNT(*) FROM Details WHERE Details.isbn = location_exemplaires_titres.isbn and Details.exemplaire = location_exemplaires_titres.exemplaire GROUP BY Details.isbn, Details.exemplaire);
+INSERT INTO location_exemplaires_titres(isbn, exemplaire, nombre_emprunt_exemplaire) 
+	SELECT isbn, exemplaire, count(*) FROM Details
+	GROUP BY isbn, numero;
+	
+UPDATE location_exemplaires_titres SET nombre_emprunt_ouvrage = (SELECT count(*) FROM Details
+	WHERE Details.isbn = location_exemplaires_titres.isbn;
 
 COMMIT;
 
@@ -265,6 +266,12 @@ SELECT * FROM location_exemplaires_titres;
 SELECT libelle, titre
 FROM Genre JOIN Ouvrage USING (code_genre)
 ORDER BY libelle;
+
+-- OU
+
+SELECT libelle, titre FROM Genre G, Ouvrage O
+WHERE G.code_genre = O.code_genre
+ORDER BY libelle, titre;
 
 -- C EST BIEN PLUS COMPLIQUE QUE CA
 
