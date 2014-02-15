@@ -120,13 +120,60 @@ ALTER TABLE Details_Emprunt
 ALTER TABLE Details ADD numero_employe INTEGER NOT NULL;
 ALTER TABLE Details_Emprunt
     ADD CONSTRAINT fk_numero_employe FOREIGN KEY (numero_employe) REFERENCES Employe(numero_employe);
-    
+
+-------2eme version selon le livre
+
+ALTER TABLE Emprunt ADD(
+	employe VARCHAR2(10);
+	date_modif date);
+	
+ALTER TABLE Details ADD(
+	employe VARCHAR2(10);
+	date_modif date);
+	
+CREATE OR REPLACE TRIGGER enr_operation_emprunt
+	BEFORE INSERT ON Emprunt
+	FOR EACH ROW
+BEGIN
+	:new.employe := user();
+	:new.date_modif := sysdate();
+END;
+
+CREATE OR REPLACE TRIGGER enr_operation_details
+	BEFORE INSERT ON Details
+	FOR EACH ROW
+BEGIN
+	:new.employe := user();
+	:new.date_modif := sysdate();
+END;
+
 /* 8   Ecrire la fonction AnalyseActivite qui accepte en paramètres le nom d’un utilisateur
 Oracle et une date et calcule le nombre d’opérations (emprunts et détails) réalisées par
 l’utilisateur, ou bien sur la journée, ou bien pour l’utilisateur sur la journée. La valeur de cette
 fonction est toujours un nombre entier.*/
 
+CREATE OR REPLACE FUNCTION AnalyseActivite (v_nom_utilisateur VARCHAR2(10), v_date DATE) RETURN INTEGER AS
+	v_nombre_operations INTEGER;
+BEGIN
+	v_nombre_operation := (SELECT count(*) FROM flashback_transaction_query
+							WHERE table_name = 'Details' AND table_name = 'Emprunt' AND xid = v_nom_utilisateur AND start_timestamp >= v_date;
+							GROUP BY xid;
+	Return v_nombre_operation;
+END;
 
 /* 9 Si tous les exemplaires référencés sur une fiche ont été rendus, alors interdire tout nouvel
 ajout de détails.*/
 
+CREATE OR REPLACE TRIGGER controle_fiche_emprunt
+	BEFORE INSERT ON Details
+	FOR EACH ROW
+DECLARE
+	v_nombre_livre_rendu INTEGER;
+	v_nombre_livre INTEGER;
+BEGIN
+	v_nombre_livre := (SELECT count(*) FROM Details WHERE Details.numero_emprunt = :old.numero_emprunt GROUP BY Details.numero_emprunt);
+	v_nombre_livre_rendu := (SELECT count(*) FROM Details WHERE Details.numero_emprunt = :old.numero_emprunt AND etat = 'RE' GROUP BY Details.numero_emprunt)
+	IF(v_nombre_livre == v_nombre_livre_rendu) THEN
+		RAISE_APPLICATION_ERROR(-20200,'Opération interdite');
+	ENDIF;
+END;
