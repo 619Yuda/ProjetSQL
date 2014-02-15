@@ -11,7 +11,7 @@ END;
 
 -- 2 Ecrire la fonction AdhesionAjour qui retourne une valeur booléenne afin de savoir si un membre peut ou non effectuer des locations.
 
-CREATE OR REPLACE FUNCTION AdhesionAjour(v_numero_membre IN INTEGER) RETURN BOOLEAN IS  
+CREATE OR REPLACE FUNCTION AdhesionAJour(v_numero_membre IN INTEGER) RETURN BOOLEAN IS  
 	v_location BOOLEAN;
 	v_date_fin_validite SYSDATE := FinValidite(v_numero_membre); 
 BEGIN  

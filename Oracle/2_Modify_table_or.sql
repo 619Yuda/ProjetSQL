@@ -32,7 +32,7 @@ ALTER TABLE Membre
 ALTER TABLE Membre
     DROP UNUSED COLUMNS;
 ALTER TABLE Membre
-    ADD CONSTRAINT constraint_name UNIQUE(numero_membre, nom, prenom, telephone_portable);
+    ADD CONSTRAINT pk_membre UNIQUE(numero_membre, nom, prenom, telephone_portable);
 
 /* 6)
 Afin d’améliorer les performances d’accès aux données, définissez un index sur toutes les colonnes de type clé étrangère. Ainsi, les opérations de jointure seront plus rapides.*/
