@@ -19,7 +19,7 @@ Comme cette nouvelle colonne va contenir des informations relatives à un numér
 ALTER TABLE Membre
     ADD telephone_portable VARCHAR(10) NOT NULL;
 
-	ALTER TABLE Membre
+    ALTER TABLE Membre
     ADD CONSTRAINT cc_telephone_portable CHECK (REGEXP_LIKE (telephone_portable, '^[0]{1}[6]{1}[0-9]{8}$'));
 
 /* 5)
@@ -32,7 +32,7 @@ ALTER TABLE Membre
 ALTER TABLE Membre
     DROP UNUSED COLUMNS;
 ALTER TABLE Membre
-    ADD CONSTRAINT pk_membre UNIQUE(numero_membre, nom, prenom, telephone_portable);
+    ADD CONSTRAINT constraint_name UNIQUE(numero_membre, nom, prenom, telephone_portable);
 
 /* 6)
 Afin d’améliorer les performances d’accès aux données, définissez un index sur toutes les colonnes de type clé étrangère. Ainsi, les opérations de jointure seront plus rapides.*/
@@ -41,7 +41,7 @@ CREATE INDEX IDX_OUVRAGE_OUVRAGE_GENRE ON Ouvrage (code_genre);
 CREATE INDEX IDX_EXEMPLAIRE_ISBN ON Exemplaire (isbn);
 CREATE INDEX IDX_EMPRUNT_NBMEMBRE ON Emprunt (numero_membre);
 CREATE INDEX IDX_NUMERO_DETAILS_EMPRUNT ON Details_emprunt(numero_detail);
-CREATE INDEX IDX_ISBN_EXEMPLAIRE ON Details_emprunt(isbn, exemplaire);
+CREATE INDEX IDX_ISBN_EXEMPLAIRE ON Details_emprunt(isbn, numero_exemplaire);
 
 /* 7)
 A l’usage, on se rend compte que lorsque l’on souhaite supprimer une fiche d’emprunt, il faut nécessairement supprimer toutes les lignes précédentes
