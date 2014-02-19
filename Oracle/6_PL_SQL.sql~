@@ -228,16 +228,21 @@ Ecrivez un bloc PL/SQL qui permet de s’assurer que tous les numéros de télé
 des membres respectent le format 06 xx xx xx xx. Puis posez une contrainte d’intégrité pour
 vous assurez que tous les numéros possèderont toujours ce format. */
 
+-- Erreur de contrainte !
+ALTER TABLE Membre MODIFY telephone_portable VARCHAR2(14);
+ALTER TABLE Membre DROP CONSTRAINT cc_telephone_portable;
+ALTER TABLE Membre ADD CONSTRAINT cc_telephone_portable CHECK (REGEXP_LIKE (telephone_portable, '^[0]{1}[6]{1}[0-9\s]{12}$'));
+
 DECLARE
 	CURSOR c_membre IS
 		SELECT telephone_portable FROM Membre
-		FOR UPDATE OF portable;
+		FOR UPDATE OF telephone_portable;
 
-	v_new_portable_membre membre.portable%type;
+	v_new_portable_membre VARCHAR2(14);
 BEGIN
-	FOR v_numero IN c_membre LOOP
-		IF (INSTR(v_numero.telephone_portable, ' ') != 2) THEN
-			v_new_portable_membre := SUBSTR(v_numero.telephone_portable, 1, 2) ||' '||SUBSTR(v_numero.telephone_portable, 3, 2) ||' '||SUBSTR(v_numero.telephone_portable, 5, 2) ||' '||SUBSTR(v_numero.telephone_portable, 7, 2) ||' '||SUBSTR(v_numero.telephone_portable, 9, 2);
+	FOR v_membre IN c_membre LOOP
+		IF (INSTR(v_membre.telephone_portable, ' ') != 2) THEN
+			v_new_portable_membre := SUBSTR(v_membre.telephone_portable, 1, 2)||' '||SUBSTR(v_membre.telephone_portable, 3, 2)||' '||SUBSTR(v_membre.telephone_portable, 5, 2)||' '||SUBSTR(v_membre.telephone_portable, 7, 2)||' '||SUBSTR(v_membre.telephone_portable, 9, 2);
 			UPDATE Membre SET telephone_portable = v_new_portable_membre
 			WHERE CURRENT OF c_membre;
 		END IF;

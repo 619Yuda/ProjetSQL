@@ -168,7 +168,6 @@ CREATE OR REPLACE PACKAGE Livre AS
 	PROCEDURE EmpruntExpress (v_membre IN NUMBER, v_isbn IN NUMBER, v_exemplaire IN NUMBER);
 END Livre;
 
---Erreur sous Oracle : Echec de la résolution des détails de l'objet
 --Corps : copier collé de toutes les fonctions et procedure ci dessus
 CREATE OR REPLACE PACKAGE BODY Libre AS
 	----------------------------------------------------------------------------------

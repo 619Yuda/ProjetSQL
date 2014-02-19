@@ -228,10 +228,7 @@ Ecrivez un bloc PL/SQL qui permet de s’assurer que tous les numéros de télé
 des membres respectent le format 06 xx xx xx xx. Puis posez une contrainte d’intégrité pour
 vous assurez que tous les numéros possèderont toujours ce format. */
 
--- Erreur de contrainte !
 ALTER TABLE Membre MODIFY telephone_portable VARCHAR2(14);
-ALTER TABLE Membre DROP CONSTRAINT cc_telephone_portable;
-ALTER TABLE Membre ADD CONSTRAINT cc_telephone_portable CHECK (REGEXP_LIKE (telephone_portable, '^[0]{1}[6]{1}[0-9\s]{12}$'));
 
 DECLARE
 	CURSOR c_membre IS
@@ -248,3 +245,4 @@ BEGIN
 		END IF;
 	END LOOP;
 END;
+
