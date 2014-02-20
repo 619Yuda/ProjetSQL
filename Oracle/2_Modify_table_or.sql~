@@ -1,8 +1,8 @@
 /*2)
 Définissez une séquence afin de faciliter la mise en place d’un numéro pour chaque membre. La séquence doit commencer avec la valeur 1 et elle possédera un pas d’incrément de 1.*/
 -- test oracle ok
-CREATE SEQUENCE seq_numero_membre START WITH 0 INCREMENT BY 1 MINVALUE 0;
-CREATE SEQUENCE seq_numero_emprunt START WITH 0 INCREMENT BY 1 MINVALUE 0;
+CREATE SEQUENCE seq_numero_membre START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE seq_numero_emprunt START WITH 1 INCREMENT BY 1;
 
 COMMIT;
 

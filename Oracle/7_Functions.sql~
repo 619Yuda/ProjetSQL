@@ -2,8 +2,7 @@
 
 -- 1 Ecrire la fonction FinValidite qui calcule la date de fin de validité de l’adhésion d’un membre dont le numéro est passé en paramètre.
 
-CREATE OR REPLACE FUNCTION FinValidite(v_numero_membre IN INTEGER) RETURN DATE IS  		
-	date_fin_validite DATE;
+CREATE OR REPLACE FUNCTION FinValidite(v_numero_membre IN INTEGER) RETURN DATE IS  		date_fin_validite DATE;
 BEGIN  
 	SELECT ADD_MONTHS(date_adhere, duree) INTO date_fin_validite
 	FROM Membre	
@@ -26,7 +25,7 @@ END;
 CREATE OR REPLACE PROCEDURE RetourExemplaire(v_isbn IN NUMBER, v_exemplaire IN NUMBER) AS
 BEGIN	
 	UPDATE Details SET date_de_rendu = SYSDATE
-	WHERE date_de_rendu IS NULL AND isbn = v_isbn AND numero_exemplaire = v_exemplaire;
+	WHERE date_de_rendu IS NULL AND isbn = v_isbn AND exemplaire = v_exemplaire;
 END;
 
 -- 4 Ecrire la procédure PurgeMembres qui permet de supprimer tous les membres dont l’adhésion n’a pas été renouvelée depuis trois ans.
@@ -74,7 +73,7 @@ BEGIN
 	ElSE
 		SELECT AVG(TRUNC(date_de_rendu, 'DD') - TRUNC(date_emprunt, 'DD')+1) INTO v_duree
 		FROM Emprunt E, Details D
-		WHERE E.numero_emprunt = D.numero_emprunt AND D.isbn = v_isbn AND D.numero_exemplaire = v_exemplaire AND date_de_rendu IS NOT NULL;
+		WHERE E.numero_emprunt = D.numero_emprunt AND D.isbn = v_isbn AND D.exemplaire = v_exemplaire AND date_de_rendu IS NOT NULL;
 	END IF;
 	Return v_duree;
 END;
@@ -86,7 +85,7 @@ CREATE OR REPLACE PROCEDURE MajEtatExemplaire IS
 	v_nombre_emprunts NUMBER;
 BEGIN
 	SELECT count(*) INTO v_nombre_emprunts FROM Details D, Exemplaire E
-	WHERE D.isbn = E.isbn and D.numero_exemplaire = E.numero_exemplaire 
+	WHERE D.isbn = E.isbn and D.exemplaire = E.numero_exemplaire 
 	GROUP BY (E.isbn, E.numero_exemplaire);
 	UPDATE Exemplaire SET etat = 'Neuf' WHERE v_nombre_emprunts <= 10;
 	UPDATE Exemplaire SET etat = 'Bon' WHERE v_nombre_emprunts BETWEEN 11 AND 25;
@@ -148,7 +147,7 @@ CREATE OR REPLACE PROCEDURE EmpruntExpress(v_numero_membre IN NUMBER, v_isbn IN 
 BEGIN
 	INSERT INTO Emprunt (numero_emprunt, numero_membre, date_emprunt)
 	VALUES(seq_emprunt.NEXTVAL, v_numero_membre, SYSDATE) RETURNING numero_emprunt INTO v_emprunt;
-	INSERT INTO Details (numero_emprunt, numero_detail, isbn, numero_exemplaire)
+	INSERT INTO Details (numero_emprunt, numero_detail, isbn, exemplaire)
 	VALUES(v_emprunt, 1, v_isbn, v_exemplaire);
 END;
 
@@ -191,7 +190,7 @@ CREATE OR REPLACE PACKAGE BODY Libre AS
 	CREATE OR REPLACE PROCEDURE RetourExemplaire(v_isbn IN NUMBER, v_exemplaire IN NUMBER) AS
 	BEGIN	
 		UPDATE Details SET date_de_rendu = SYSDATE
-		WHERE date_de_rendu IS NULL AND isbn = v_isbn AND numero_exemplaire = v_exemplaire;
+		WHERE date_de_rendu IS NULL AND isbn = v_isbn AND exemplaire = v_exemplaire;
 	END;
 	----------------------------------------------------------------------------------
 	CREATE OR REPLACE PROCEDURE PurgeMembres AS
@@ -228,7 +227,7 @@ CREATE OR REPLACE PACKAGE BODY Libre AS
 		ElSE
 			SELECT AVG(TRUNC(date_de_rendu, 'DD') - TRUNC(date_emprunt, 'DD')+1) INTO v_duree
 			FROM Emprunt E, Details D
-			WHERE E.numero_emprunt = D.numero_emprunt AND D.isbn = v_isbn AND D.numero_exemplaire = v_exemplaire AND date_de_rendu IS NOT NULL;
+			WHERE E.numero_emprunt = D.numero_emprunt AND D.isbn = v_isbn AND D.exemplaire = v_exemplaire AND date_de_rendu IS NOT NULL;
 		END IF;
 		Return v_duree;
 	END;
@@ -237,7 +236,7 @@ CREATE OR REPLACE PACKAGE BODY Libre AS
 		v_nombre_emprunts NUMBER;
 	BEGIN
 		SELECT count(*) INTO v_nombre_emprunts FROM Details D, Exemplaire E
-		WHERE D.isbn = E.isbn and D.numero_exemplaire = E.numero_exemplaire 
+		WHERE D.isbn = E.isbn and D.exemplaire = E.numero_exemplaire 
 		GROUP BY (E.isbn, E.numero_exemplaire);
 		UPDATE Exemplaire SET etat = 'Neuf' WHERE v_nombre_emprunts <= 10;
 		UPDATE Exemplaire SET etat = 'Bon' WHERE v_nombre_emprunts BETWEEN 11 AND 25;
@@ -273,7 +272,7 @@ CREATE OR REPLACE PACKAGE BODY Libre AS
 	BEGIN
 		INSERT INTO Emprunt (numero_emprunt, numero_membre, date_emprunt)
 		VALUES(seq_emprunt.NEXTVAL, v_numero_membre, SYSDATE) RETURNING numero_emprunt INTO v_emprunt;
-		INSERT INTO Details (numero_emprunt, numero_detail, isbn, numero_exemplaire)
+		INSERT INTO Details (numero_emprunt, numero_detail, isbn, exemplaire)
 		VALUES(v_emprunt, 1, v_isbn, v_exemplaire);
 	END;
 	----------------------------------------------------------------------------------

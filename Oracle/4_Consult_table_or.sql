@@ -17,6 +17,8 @@ Les manipulations de la table des membres sont sensibles. Activez l’historique
 ALTER TABLE Membre ENABLE ROW MOVEMENT;
 ALTER TABLE Details ENABLE ROW MOVEMENT;
 
+COMMIT;
+
 -- ##############################################################################################
 
 /* 6) Ajout d’une colonne :
@@ -25,9 +27,12 @@ Pour faciliter la gestion des emprunts et identifier plus rapidement les fiches 
 -- Ajout d'une colone nb_emprunt dans la table Exemplaire afin de comptabiliser le nombre d'emprunt de chaque livre
 ALTER TABLE Emprunt ADD etat VARCHAR(2) DEFAULT 'EC';
 ALTER TABLE Emprunt ADD CONSTRAINT cc_emprunt_etat CHECK(etat IN('RE', 'EC'));
+COMMIT;
 
 -- Definition de l'état initial
 UPDATE emprunt SET etat = 'RE' WHERE numero_emprunt NOT IN (SELECT DISTINCT numero_emprunt FROM details WHERE date_de_rendu IS NULL);
+
+COMMIT;
 
 SELECT * FROM Emprunt;
 
@@ -39,6 +44,7 @@ On souhaite modifier l’état des exemplaires en fonction de leur nombre de loc
 -- Reinitialisation de l'etat de tt les exemplaires
 
 UPDATE exemplaire SET etat = 'Neuf';
+COMMIT;
 
 -- La sous requête SELECT renvoie la liste des isbn et numero d'exemplaire ayant été comptabilisé plus de n fois dans la table details. 
 -- Ces valeurs sont ensuite utilisées pour mettre à jour l'état des exemplaires concernés dans la table Exemplaire
@@ -49,15 +55,21 @@ SET etat = 'Bon'
 WHERE (isbn, numero_exemplaire) IN (
     SELECT  isbn, numero_exemplaire FROM details GROUP BY isbn, numero_exemplaire HAVING COUNT(*) BETWEEN 2 AND 3);
 
+COMMIT;
+
 UPDATE exemplaire
 SET etat = 'Moyen'
 WHERE (isbn, numero_exemplaire) IN (
     SELECT  isbn, numero_exemplaire FROM details GROUP BY isbn, numero_exemplaire HAVING COUNT(*) BETWEEN 4 AND 5);
 
+COMMIT;
+
 UPDATE exemplaire
 SET etat = 'Mauvais'
 WHERE (isbn, numero_exemplaire) IN (
     SELECT  isbn, numero_exemplaire FROM details GROUP BY isbn, numero_exemplaire HAVING COUNT(*) >= 6);
+
+COMMIT;
 
 SELECT * FROM exemplaire;
 
@@ -69,6 +81,7 @@ SELECT * FROM exemplaire;
 
 DELETE FROM exemplaire WHERE etat LIKE 'Mauvais';
 
+COMMIT;
 
 -- ##############################################################################################
 
@@ -190,6 +203,7 @@ CREATE OR REPLACE VIEW nb_ouvrages_empruntes AS
     FROM Emprunt E JOIN Details USING (numero_emprunt)
     WHERE E.etat = 'EC'
     GROUP BY numero_membre;
+COMMIT;
 
 -- OUTDATED JOIN ALTERNATIVE
 
@@ -198,6 +212,7 @@ CREATE OR REPLACE VIEW nb_ouvrages_empruntes AS
     FROM Emprunt E, Details D
     WHERE E.numero_emprunt = D.numero_emprunt and E.etat = 'EC'
     GROUP BY numero_membre;
+COMMIT;
 
 SELECT * FROM nb_ouvrages_empruntes;
 
@@ -209,6 +224,7 @@ CREATE OR REPLACE VIEW nb_emprunts_par_ouvrage AS
     SELECT isbn, COUNT (*) AS Nb_emprunt 
     FROM Details
     GROUP BY isbn;
+COMMIT;
 
 SELECT * FROM nb_emprunts_par_ouvrage;
 

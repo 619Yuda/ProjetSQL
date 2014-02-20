@@ -3,10 +3,12 @@ DROP TABLE Emprunt PURGE;
 DROP TABLE Exemplaire PURGE;
 DROP TABLE Ouvrage PURGE;
 DROP TABLE Membre PURGE;
-DROP PUBLIC SYNONYM Abonnes;
 DROP TABLE Genre PURGE;
-DROP SEQUENCE seq_numero_membre;
-DROP SEQUENCE seq_numero_emprunt;
+DROP PUBLIC SYNONYM Abonnes PURGE;
+DROP SEQUENCE seq_numero_membre PURGE;
+DROP SEQUENCE seq_numero_emprunt PURGE;
+
+COMMIT;
 
 -- ***************************************************************************************************
 
@@ -15,6 +17,8 @@ CREATE TABLE Genre(
     libelle        VARCHAR2(30) NOT NULL,
 -- -------------------------------------------------------------------------
     CONSTRAINT pk_genre PRIMARY KEY (code_genre));
+
+COMMIT;
 
 -- ***************************************************************************************************
 
@@ -28,6 +32,8 @@ CREATE TABLE Ouvrage(
     CONSTRAINT pk_ouvrage PRIMARY KEY (isbn),
     CONSTRAINT fk_ouvrage_genre FOREIGN KEY (code_genre) REFERENCES Genre(code_genre) ON DELETE SET NULL);
 
+COMMIT;
+
 -- ***************************************************************************************************
 
 CREATE TABLE Exemplaire(
@@ -38,6 +44,8 @@ CREATE TABLE Exemplaire(
     CONSTRAINT pk_exemplaire PRIMARY KEY (isbn, numero_exemplaire),
     CONSTRAINT fk_exemplaire_ouvrage FOREIGN KEY (isbn) REFERENCES Ouvrage(isbn) ON DELETE SET NULL,
     CONSTRAINT cc_exemplaire_etat CHECK( etat IN ('Neuf', 'Bon', 'Moyen', 'Mauvais')));
+
+COMMIT;
 
 -- ***************************************************************************************************
 
@@ -53,6 +61,8 @@ CREATE TABLE Membre(
     CONSTRAINT pk_membre PRIMARY KEY(numero_membre),
     CONSTRAINT cc_membre_duree CHECK( duree IN (1, 3, 6, 12)));
 
+COMMIT;
+
 -- ***************************************************************************************************
 
 CREATE TABLE Emprunt(
@@ -62,6 +72,8 @@ CREATE TABLE Emprunt(
 -- -------------------------------------------------------------------------
     CONSTRAINT pk_emprunt PRIMARY KEY (numero_emprunt),
     CONSTRAINT fk_emprunt_membre FOREIGN KEY (numero_membre) REFERENCES Membre(numero_membre) ON DELETE SET NULL);
+
+COMMIT;
 
 -- ***************************************************************************************************
 
@@ -75,6 +87,8 @@ CREATE TABLE Details_Emprunt(
     CONSTRAINT pk_details PRIMARY KEY (numero_emprunt, numero_detail),
     CONSTRAINT fk_details_emprunt FOREIGN KEY (numero_emprunt) REFERENCES Emprunt(numero_emprunt) ON DELETE SET NULL,
     CONSTRAINT fk_details_exemplaire FOREIGN KEY (isbn, numero_exemplaire) REFERENCES Exemplaire(isbn, numero_exemplaire) ON DELETE SET NULL);
+
+COMMIT;
 
 -- ***************************************************************************************************
 
